@@ -16,11 +16,6 @@ RUN apt-get update && apt-get install -y \
 
 # Create a working directory
 WORKDIR /workspace
-COPY requirements.txt .
-
-# Install dependencies
-RUN pip install --upgrade pip && \
-    pip install -r requirements.txt || true
 
 # Default shell
 CMD [ "bash" ]

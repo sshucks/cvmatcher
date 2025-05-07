@@ -8,10 +8,7 @@ This projects aims to match the best applicants to a job description based on th
 Download and Install Docker Desktop: https://docs.docker.com/get-started/introduction/get-docker-desktop/
 Download and Install VSCode: https://code.visualstudio.com/download
 
-Install the following VSCode Extension:
-```
-ms-vscode-remote.remote-containers
-```
+Install the following VSCode Extension: ms-vscode-remote.remote-containers
 
 ### Checkout Repository
 If you have problems with authentication use GitHub Desktop to clone repository.
@@ -28,7 +25,11 @@ Click “Reopen in Container” when prompted, or press Ctrl + Shift + P, then s
 
 Put example CVs in *code/input_cvs*
 
-If necessary delete already parsed CVs from *code/extracting/cv/extracted_cvs* and *code/matching/TRESCON/cv_dicts*
+If necessary delete already parsed CVs from
+<ul>
+    <li>*code/extracting/cv/extracted_cvs*</li>
+    <li>*code/matching/TRESCON/cv_dicts*</li>
+<ul>
 
 ### Process CVs
 ```
