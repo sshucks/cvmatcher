@@ -1,0 +1,16 @@
+{
+  "name": "CV Matcher",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "remoteUser": "root",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-python.debugpy" // Python Debugging
+      ]
+    }
+  }
+}
