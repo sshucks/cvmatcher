@@ -1,0 +1,16 @@
+services:
+  fastapi:
+    build: .
+    command: python -m fastapi dev api/api_call.py
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+
+  streamlit:
+    build: .
+    command: python -m streamlit run streamlit/matching_app.py --server.port=8501 --server.address=0.0.0.0
+    ports:
+      - "8501:8501"
+    volumes:
+      - .:/app

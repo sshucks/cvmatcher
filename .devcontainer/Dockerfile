@@ -17,5 +17,10 @@ RUN apt-get update && apt-get install -y \
 # Create a working directory
 WORKDIR /workspace
 
-# Default shell
-CMD [ "bash" ]
+COPY requirements.txt .
+RUN pip install --upgrade pip && pip install -r requirements.txt
+
+COPY start_services.sh /start_services.sh
+RUN chmod +x /start_services.sh
+
+CMD ["/workspace/start_services.sh"]

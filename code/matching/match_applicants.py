@@ -3,7 +3,7 @@ import sys
 import pprint
 import os
 import pandas as pd
-from config import CV_OUTPUT_DIR_MATCHING
+from code.config import CV_OUTPUT_DIR_MATCHING
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from matching.match_requirements import Model

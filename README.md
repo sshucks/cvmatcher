@@ -10,6 +10,7 @@ Download and Install VSCode: https://code.visualstudio.com/download
 
 Install the following VSCode Extension: ms-vscode-remote.remote-containers
 
+
 ### Checkout Repository
 If you have problems with authentication use GitHub Desktop to clone repository.
 
@@ -18,6 +19,8 @@ git clone https://github.com/sshucks/cvmatcher
 cd cvmatcher
 code .
 ```
+
+Make sure that Docker Desktop is running.
 
 Click “Reopen in Container” when prompted, or press Ctrl + Shift + P, then select “Dev Containers: Reopen in Container” from the command palette.
 
@@ -33,15 +36,15 @@ If necessary delete already parsed CVs from
 
 ### Process CVs
 ```
-python code/extracting/extraction_main.py
+python extracting/extraction_main.py
 ```
 
 ### Start FastAPI
 ```
-python -m fastapi dev code/api/api_call.py
+python -m fastapi dev api/api_call.py
 ```
 
 ### Start Streamlit App
 ```
-python -m streamlit run code/streamlit/matching_app.py
+python -m streamlit run streamlit/matching_app.py
 ```

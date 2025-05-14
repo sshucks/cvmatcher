@@ -1,0 +1,15 @@
+pymupdf
+tqdm
+streamlit
+streamlit-extras
+torch
+docx2python
+transformers
+numpy<2.0
+scikit-learn
+pandas
+requests
+streamlit
+fastapi
+fastapi[standard]
+huggingface_hub[hf_xet]

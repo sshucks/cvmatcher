@@ -3,7 +3,7 @@
   "build": {
     "dockerfile": "Dockerfile"
   },
-  "postCreateCommand": "pip install --upgrade pip && pip install -r requirements.txt || true",
+  // "postCreateCommand": "pip install --upgrade pip && pip install -r requirements.txt || true",
   "remoteUser": "root",
   "customizations": {
     "vscode": {
