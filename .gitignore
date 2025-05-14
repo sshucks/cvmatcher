@@ -1,5 +1,6 @@
 __pycache__/
 .venv/
-input_cvs/*
-extracted_cvs/*
-extracted_cvs_matching/*
+**/input_cvs/*
+**/extracted_cvs/*
+**/extracted_cvs_matching/*
+**/cv_dicts/*
