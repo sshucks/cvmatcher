@@ -1,6 +1,13 @@
 __pycache__/
 .venv/
+
 **/input_cvs/*
+!input_cvs/.gitkeep
+
 **/extracted_cvs/*
+!extracted_cvs/.gitkeep
+
 **/extracted_cvs_matching/*
+!extracted_cvs_matching/.gitkeep
+
 **/cv_dicts/*
