@@ -3,6 +3,7 @@ import sys
 import pprint
 import os
 import pandas as pd
+from src.config import CV_OUTPUT_DIR, CV_OUTPUT_DIR_MATCHING
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from matching.match_requirements import Model
@@ -180,9 +181,10 @@ def match_applicant(file, work_weight, skill_weight, personal_weight, education_
                                                                                                                 education_requirements)
     score_dict = {}
     try:
-        for i, applicant in enumerate(sorted(os.listdir("./src/matching/TRESCON/cv_dicts/"))):
+        for i, applicant in enumerate(sorted(os.listdir(CV_OUTPUT_DIR_MATCHING))):
             try:
-                score = calculate_score("./src/matching/TRESCON/cv_dicts/" + applicant, requirements_data, 
+
+                score = calculate_score(os.path.join(CV_OUTPUT_DIR_MATCHING, applicant), requirements_data, 
                                         position_name, skill_list, personal_skills_list, qualification_list, education_requirements,
                                         work_weight, skill_weight, personal_weight, education_weight)
                 #print(score)

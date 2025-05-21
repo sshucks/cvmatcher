@@ -11,6 +11,7 @@ RUN apt-get update && apt-get install -y \
     curl \
     git \
     ca-certificates \
+    tmux \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -20,7 +21,5 @@ WORKDIR /workspace
 COPY requirements.txt .
 RUN pip install --upgrade pip && pip install -r requirements.txt
 
-COPY start_services.sh /start_services.sh
-RUN chmod +x /start_services.sh
 
-CMD ["/workspace/start_services.sh"]
+CMD ["/workspace/start-services.sh"]

@@ -21,30 +21,29 @@ code .
 ```
 
 Make sure that Docker Desktop is running.
-
-Click “Reopen in Container” when prompted, or press Ctrl + Shift + P, then select “Dev Containers: Reopen in Container” from the command palette.
+Open Folder cvmatcher in VS Code and click “Reopen in Container” when prompted, or press Ctrl + Shift + P, then select “Dev Containers: Reopen in Container” from the command palette.
 
 ## Run Project
 
-Put example CVs in *code/input_cvs*
+Put example CVs in *input_cvs*
 
 If necessary delete already parsed CVs from
 <ul>
-    <li>*code/extracting/cv/extracted_cvs*</li>
-    <li>*code/matching/TRESCON/cv_dicts*</li>
+    <li>*extracted_cvs*</li>
+    <li>*extracted_cvs_matching*</li>
 <ul>
 
 ### Process CVs
 ```
-python extracting/extraction_main.py
+python src/extracting/extraction_main.py
 ```
 
 ### Start FastAPI
 ```
-python -m fastapi dev api/api_call.py
+python -m fastapi dev src/api/api_call.py
 ```
 
 ### Start Streamlit App
 ```
-python -m streamlit run streamlit/matching_app.py
+python -m streamlit run src/streamlit/matching_app.py
 ```

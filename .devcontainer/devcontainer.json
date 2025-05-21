@@ -3,7 +3,10 @@
   "build": {
     "dockerfile": "Dockerfile"
   },
-  // "postCreateCommand": "pip install --upgrade pip && pip install -r requirements.txt || true",
+  "containerEnv": {
+    "PYTHONPATH": "/workspaces/cvmatcher"
+  },
+  "postStartCommand": "chmod +x ./start-services.sh && ./start-services.sh",
   "remoteUser": "root",
   "customizations": {
     "vscode": {
