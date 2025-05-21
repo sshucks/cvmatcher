@@ -26,11 +26,10 @@ Open Folder cvmatcher in VS Code and click “Reopen in Container” when prompt
 ## Run Project
 
 Put example CVs in *input_cvs*
-
 If necessary delete already parsed CVs from
 <ul>
-    <li>*extracted_cvs*</li>
-    <li>*extracted_cvs_matching*</li>
+    <li>extracted_cvs</li>
+    <li>extracted_cvs_matching</li>
 <ul>
 
 ### Process CVs
