@@ -44,7 +44,7 @@ python -m streamlit run src/streamlit/matching_app.py
 ```
 
 
-## Use the application
+## Run the application
 
 ### Setup
 
@@ -60,7 +60,7 @@ cd cvmatcher
 or unzip the downloaded source code in your desired workspace.
 
 #### Build Docker Container
-Make sure that Docker Desktop is running, then open a terminal in the directory cv_matcher and run the following command to build the docker container. 
+Make sure that Docker Desktop is running, then open a terminal in the directory *cv_matcher* and run the following command to build the docker container. 
 
 ```
 docker build -f .devcontainer/Dockerfile -t cvmatcher-dev .
@@ -69,11 +69,14 @@ docker build -f .devcontainer/Dockerfile -t cvmatcher-dev .
 This can take quite a long time (up to 20 minutes) and only needs to be done once. Once the container has built, you can start the application as written below.
 
 ### Start the application
+
+First make sure that Docker Desktop is running, then run the following command in a terminal inside the directory *cv_matcher*.
+
 ```
 docker run -it --rm -p 8501:8501 -p 8000:8000 -v "${PWD}:/workspaces/cvmatcher" -w /workspaces/cvmatcher -e PYTHONPATH=/workspaces/cvmatcher --name cvmatcher cvmatcher-dev
 ```
 
-The API and Streamlit-App start automatically after running this command. Note that there is some more wait time included in starting the API. After both applications have started successfully the application can be accessed at http://localhost:8501/
+The API and Streamlit-App will start automatically, but note that there is some more wait time included in starting the API. After both applications have started successfully, the application can be accessed at http://localhost:8501/
 
 Note that the matching won't work without any processed CVs.
 
@@ -83,7 +86,7 @@ Put example CVs in *input_cvs* and delete already parsed CVs from these director
 <ul>
     <li>extracted_cvs</li>
     <li>extracted_cvs_matching</li>
-<ul>
+</ul>
 
 To process the CVs make sure the application has started, then run the following command
 ```
@@ -93,8 +96,15 @@ Ensure you are in the docker container and the terminal looks something like thi
 root@6c7b7f44dbc3:/workspaces/cvmatcher#
 
 Then run the following command to process the CVs from the input folder
+
 ```
 python src/extracting/extraction_main.py
 ```
 
-You are now good to go to use the application!
+The application is now good to go!
+
+### Stop the application
+To stop the application execute the following command or stop the container *cv_matcher* in Docker Desktop.
+```
+docker stop cvmatcher
+```
