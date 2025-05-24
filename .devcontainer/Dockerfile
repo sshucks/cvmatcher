@@ -15,11 +15,13 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Create a working directory
-WORKDIR /workspace
+
+WORKDIR /workspaces/cvmatcher
 
 COPY requirements.txt .
 RUN pip install --upgrade pip && pip install -r requirements.txt
 
+COPY start-services.sh .
+RUN chmod +x start-services.sh
 
-CMD ["/workspace/start-services.sh"]
+CMD ["bash", "./start-services.sh"]
