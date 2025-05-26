@@ -2,48 +2,6 @@
 
 This projects aims to match the best applicants to a job description based on their CV.
 
-## Contribute to this project using VS Code
-
-### Setup
-
-#### Requirements
-Download and Install Docker Desktop: https://docs.docker.com/get-started/introduction/get-docker-desktop/
-
-Download and Install VSCode: https://code.visualstudio.com/download
-Install the following VSCode Extension: ms-vscode-remote.remote-containers
-
-
-#### Checkout Repository
-If you have problems with authentication use GitHub Desktop to clone repository.
-
-```
-git clone https://github.com/sshucks/cvmatcher
-cd cvmatcher
-code .
-```
-
-### Start Devcontainer in VS Code
-Make sure that Docker Desktop is running.
-Open Folder cvmatcher in VS Code and click “Reopen in Container” when prompted, or press Ctrl + Shift + P, then select “Dev Containers: Reopen in Container” from the command palette.
-
-The API and Streamlit-App start automatically right after building the container. Note that there is some more wait time included in starting the API. After both applications have started successfully, the application can be accessed at http://localhost:8501/
-
-#### Process CVs
-```
-python src/extracting/extraction_main.py
-```
-
-#### Start FastAPI
-```
-python -m fastapi dev src/api/api_call.py
-```
-
-#### Start Streamlit App
-```
-python -m streamlit run src/streamlit/matching_app.py
-```
-
-
 ## Run the application
 
 ### Setup
@@ -107,4 +65,45 @@ The application is now good to go!
 To stop the application execute the following command or stop the container *cv_matcher* in Docker Desktop.
 ```
 docker stop cvmatcher
+```
+
+## Contribute to this project using VS Code
+
+### Setup
+
+#### Requirements
+Download and Install Docker Desktop: https://docs.docker.com/get-started/introduction/get-docker-desktop/
+
+Download and Install VSCode: https://code.visualstudio.com/download
+Install the following VSCode Extension: ms-vscode-remote.remote-containers
+
+
+#### Checkout Repository
+If you have problems with authentication use GitHub Desktop to clone repository.
+
+```
+git clone https://github.com/sshucks/cvmatcher
+cd cvmatcher
+code .
+```
+
+### Start Devcontainer in VS Code
+Make sure that Docker Desktop is running.
+Open Folder cvmatcher in VS Code and click “Reopen in Container” when prompted, or press Ctrl + Shift + P, then select “Dev Containers: Reopen in Container” from the command palette.
+
+The API and Streamlit-App start automatically right after building the container. Note that there is some more wait time included in starting the API. After both applications have started successfully, the application can be accessed at http://localhost:8501/
+
+#### Process CVs
+```
+python src/extracting/extraction_main.py
+```
+
+#### Start FastAPI
+```
+python -m fastapi dev src/api/api_call.py
+```
+
+#### Start Streamlit App
+```
+python -m streamlit run src/streamlit/matching_app.py
 ```
