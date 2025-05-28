@@ -6,6 +6,8 @@ import sys
 import os
 from typing import List
 
+from typing import List
+
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from matching.match_applicants import match_applicant
@@ -36,10 +38,13 @@ async def process_matching(
     n: int = Form(...)
 ):
     try:
+        print("In server")
         # Simulate processing the uploaded file
         print([i.filename for i in input_cvs])
         save_input_cvs(input_cvs)
         print(f"Received file: {requirements.filename}")
+        #print([f.filename for f in files])
+        
         #file_content = await requirements.read()
 
         # Call the matching logic

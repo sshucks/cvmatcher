@@ -42,6 +42,11 @@ col3.write("## Matching Results")
 col1_1, col1_2 = col1.columns(2)
 
 cv_path = "input_cvs"
+col1.write("## File Uploads")
+col2.write("## Parameters")
+col3.write("## Matching Results")
+
+col1_1, col1_2 = col1.columns(2)
 
 with col1:
     requirements = st.file_uploader('Upload requirements')
