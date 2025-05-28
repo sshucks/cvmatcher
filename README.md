@@ -30,6 +30,12 @@ This can take quite a long time (up to 20 minutes) and only needs to be done onc
 
 First make sure that Docker Desktop is running, then run the following command in a terminal inside the directory *cv_matcher*.
 
+If you are using Windows:
+```
+docker run -it --rm -p 8501:8501 -p 8000:8000 -v "%cd%:/workspaces/cvmatcher" -w /workspaces/cvmatcher -e PYTHONPATH=/workspaces/cvmatcher --name cvmatcher cvmatcher-dev
+```
+
+If you are using Linux or WSL:
 ```
 docker run -it --rm -p 8501:8501 -p 8000:8000 -v "${PWD}:/workspaces/cvmatcher" -w /workspaces/cvmatcher -e PYTHONPATH=/workspaces/cvmatcher --name cvmatcher cvmatcher-dev
 ```
