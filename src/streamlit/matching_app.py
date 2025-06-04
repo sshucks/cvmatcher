@@ -4,6 +4,7 @@ import requests
 
 import sys
 import os
+import src.extracting.extraction_main as extraction
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 # --- --- ---
@@ -12,8 +13,33 @@ st.title('CV Matcher')
 
 col1, col2 = st.columns([1.5, 1])
 
+cv_path = "input_cvs"
+
 with col1:
     requirements = st.file_uploader('Upload requirements')
+    # start new
+    cvs = st.file_uploader('Upload cvs', accept_multiple_files=True, type=["pdf", "docx"])
+
+    process = st.button('Process CVs')
+
+
+
+    if cvs:
+        for uploaded_file in cvs:
+            file_path = os.path.join(cv_path, uploaded_file.name)
+
+            # Save file to disk
+            with open(file_path, "wb") as f:
+                f.write(uploaded_file.getbuffer())
+
+    if process:
+        print("Processing CVS")
+        extraction.main()
+        col1.success("CVs processed")
+
+    col1.write('## Matching results')
+
+# end new
 
 
 with col2:
@@ -28,7 +54,7 @@ with col2:
         apply = st.form_submit_button('Apply')
 
 
-col1.write('## Matching results')
+
 
 if apply:
     if requirements:
