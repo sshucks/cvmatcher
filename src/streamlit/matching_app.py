@@ -5,6 +5,7 @@ import unicodedata
 
 import sys
 import os
+import src.extracting.extraction_main as extraction
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 MIME_TYPES = {
@@ -40,6 +41,8 @@ col3.write("## Matching Results")
 
 col1_1, col1_2 = col1.columns(2)
 
+cv_path = "input_cvs"
+
 with col1:
     requirements = st.file_uploader(label="Upload requirements", type=['doc','docx'])
     cvs = st.file_uploader("CVs", accept_multiple_files=True, type=['doc','docx', "pdf"])
@@ -55,6 +58,8 @@ with col2:
         number = st.number_input('Results shown', min_value=1, max_value=100, value=10, help='Number of best matches shown', label_visibility='visible')
 
         apply = st.form_submit_button('Apply')
+
+
 
 
 if apply:
