@@ -1,14 +1,15 @@
 {
   "name": "CV Matcher",
   "build": {
-    "dockerfile": "Dockerfile"
+    "dockerfile": "Dockerfile",
+    "context": ".."
   },
   "containerEnv": {
     "PYTHONPATH": "/workspaces/cvmatcher"
   },
   "remoteUser": "root",
   "workspaceFolder": "/workspaces/cvmatcher",
-  "postStartCommand": "./start-services.sh",
+  "postStartCommand": "chmod +x start-services.sh; ./start-services.sh",
   "customizations": {
     "vscode": {
       "extensions": [
