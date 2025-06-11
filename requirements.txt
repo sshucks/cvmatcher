@@ -13,3 +13,4 @@ streamlit
 fastapi
 fastapi[standard]
 huggingface_hub[hf_xet]
+SQLAlchemy

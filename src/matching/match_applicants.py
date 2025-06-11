@@ -193,7 +193,7 @@ def get_mail(file: str) -> str:
 def match_applicant(file, work_weight, skill_weight, personal_weight, education_weight, n):
     print(type(file))
     score_dict = {}
-def match_applicant(file, work_weight, skill_weight, personal_weight, education_weight, n, applicants) -> pd.DataFrame:
+def match_applicant(file, work_weight, skill_weight, personal_weight, education_weight, n) -> pd.DataFrame:
     """ Match all applicants in the database against the provided requirements. 
     The weights of each area (work, skills personal and education) are normalised by dividing by the sum of all weights
     
