@@ -165,35 +165,60 @@ def calculate_score(applicant_data, requirements_data,
             "Birthdate": personal_information["birthdate"],
             "Score": final_score}
 
-def match_applicant(file, work_weight, skill_weight, personal_weight, education_weight, n):
-    print(type(file))
-    score_dict = {}
+def match_applicant(file, work_weight, skill_weight, personal_weight, education_weight, n, applicants) -> pd.DataFrame:
+    """ Match all applicants in the database against the provided requirements. 
+    The weights of each area (work, skills personal and education) are normalised by dividing by the sum of all weights
+    
+    :param file: (docx) file containing requirements for the matching applicants
+    :type file: starlette.datastructures.UploadFile
+    :param work_weight: weight of work experience
+    :type work_weight: int
+    :param skill_weight: weight of skills
+    :type skill_weight: int
+    :param personal_weight: weigth of personal skills
+    :type personal_weight: int
+    :param education_weight: weight of education
+    :type education_weight: int
+    :param n: number of top applicants to return
+    :type n: int
+    :return: table of top n applicants according to their score, including personal information 
+    :rtype: pd.DataFrame
+    """
+        
+    # normalize weights
     total_weights = work_weight + skill_weight + personal_weight + education_weight
     work_weight = work_weight / total_weights
     skill_weight = skill_weight / total_weights
     personal_weight = personal_weight / total_weights
     education_weight = education_weight / total_weights
+    
+    # parse requirements file and extract information
     position_name, skill_list, personal_skills_list, qualification_list, education_requirements = extract_requirement(file.file)
-    requirements_data = calculate_requirement_embeddings(position_name, 
-                                                                                                                        skill_list,
-                                                                                                                        personal_skills_list, 
-                                                                                                                        qualification_list, 
-                                                                                                                education_requirements)
+    
+    # calculate embeddings of extracted informaton
+    requirements_data = calculate_requirement_embeddings(position_name, skill_list, personal_skills_list, 
+                                                         qualification_list, education_requirements)
+    
+    # score applicants
     score_dict = {}
     try:
+        # calculate score for each applicant in selection
+        # TODO: parallelize here
         for i, applicant in enumerate(sorted(os.listdir(CV_OUTPUT_DIR_MATCHING))):
             try:
-
+                
+                # calculate score
                 score = calculate_score(os.path.join(CV_OUTPUT_DIR_MATCHING, applicant), requirements_data, 
                                         position_name, skill_list, personal_skills_list, qualification_list, education_requirements,
                                         work_weight, skill_weight, personal_weight, education_weight)
-                #print(score)
+                # store result
                 score_dict[score["Name"]] = {"Score": score["Score"],
                                          "Birthdate": score["Birthdate"],
                                          "Filename": applicant} 
             except Exception as e:
                 print(f"Calculation for {applicant} did not work because {e}")    
-    
+
+        # combine results into dataframe and return top n scoring entries
         result_df = pd.DataFrame.from_dict(score_dict, orient='index', columns=['Score', 'Birthdate', 'Filename']).reset_index()
         result_df.rename(columns={'index': 'Name'}, inplace=True)
         result_df = result_df.sort_values(by='Score', ascending=False).head(n)    
