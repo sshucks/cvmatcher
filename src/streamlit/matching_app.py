@@ -52,10 +52,7 @@ with col1:
     requirements = st.file_uploader('Upload requirements')
     # start new
     cvs = st.file_uploader('Upload cvs', accept_multiple_files=True, type=["pdf", "docx"])
-
-    col1.write('## Matching results')
-
-# end new
+    # end new
 
 
 with col2:
@@ -106,15 +103,14 @@ if apply:
             "filename": requirements.name
         }   
         
-        print([f"{f[0]} - {f[1][0]}: {f[1][2]}" for f in files_to_send])
 
         response = requests.post("http://127.0.0.1:8000/process", files=files,   data=data)
 
         if response.status_code == 200:
             results = response.json().get("results", [])
-            col1.dataframe(results, column_config={"E-Mail": st.column_config.LinkColumn(display_text="E-Mail")})
+            col3.dataframe(results, column_config={"E-Mail": st.column_config.LinkColumn(display_text="E-Mail")})
 
         else:
-            col1.error(f"Error: {response.status_code} - {response.json().get('error')}")
+            col3.error(f"Error: {response.status_code} - {response.json().get('error')}")
     else:
-        col1.error("Please upload a requirements file.")
+        col3.error("Please upload a requirements file.")
