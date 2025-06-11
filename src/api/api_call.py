@@ -45,7 +45,8 @@ async def process_matching(
         print(f"Received file: {requirements.filename}")
         #print([f.filename for f in files])
         
-        #file_content = await requirements.read()
+        # TODO: store CVs in filesystem and calculate hash and insert into database
+        # TODO: extract CVs using API
 
         # Call the matching logic
         results_df = call_matching(requirements, edu_weight, exp_weight, pro_weight, per_weight, n)
