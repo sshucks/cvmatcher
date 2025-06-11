@@ -20,23 +20,6 @@ with col1:
     # start new
     cvs = st.file_uploader('Upload cvs', accept_multiple_files=True, type=["pdf", "docx"])
 
-    process = st.button('Process CVs')
-
-
-
-    if cvs:
-        for uploaded_file in cvs:
-            file_path = os.path.join(cv_path, uploaded_file.name)
-
-            # Save file to disk
-            with open(file_path, "wb") as f:
-                f.write(uploaded_file.getbuffer())
-
-    if process:
-        print("Processing CVS")
-        extraction.main()
-        col1.success("CVs processed")
-
     col1.write('## Matching results')
 
 # end new
@@ -59,7 +42,13 @@ with col2:
 if apply:
     if requirements:
         # Prepare data for API call
-        files = {"requirements": requirements.getvalue()}
+        files = [("requirements", (requirements.name, requirements, requirements.type))]
+
+        if cvs:
+            for file in cvs:
+                files.append(("input_cvs", (file.name, file, file.type)))
+
+
         data = {
             "edu_weight": edu_weight,
             "exp_weight": exp_weight,
