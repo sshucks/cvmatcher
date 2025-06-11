@@ -4,6 +4,7 @@ import requests
 
 import sys
 import os
+import src.extracting.extraction_main as extraction
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 # --- --- ---
@@ -12,8 +13,16 @@ st.title('CV Matcher')
 
 col1, col2 = st.columns([1.5, 1])
 
+cv_path = "input_cvs"
+
 with col1:
     requirements = st.file_uploader('Upload requirements')
+    # start new
+    cvs = st.file_uploader('Upload cvs', accept_multiple_files=True, type=["pdf", "docx"])
+
+    col1.write('## Matching results')
+
+# end new
 
 
 with col2:
@@ -28,12 +37,18 @@ with col2:
         apply = st.form_submit_button('Apply')
 
 
-col1.write('## Matching results')
+
 
 if apply:
     if requirements:
         # Prepare data for API call
-        files = {"requirements": requirements.getvalue()}
+        files = [("requirements", (requirements.name, requirements, requirements.type))]
+
+        if cvs:
+            for file in cvs:
+                files.append(("input_cvs", (file.name, file, file.type)))
+
+
         data = {
             "edu_weight": edu_weight,
             "exp_weight": exp_weight,
