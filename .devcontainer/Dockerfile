@@ -21,7 +21,7 @@ WORKDIR /workspaces/cvmatcher
 COPY requirements.txt .
 RUN pip install --upgrade pip && pip install -r requirements.txt
 
-COPY start-services.sh .
+COPY .devcontainer/start-services.sh .
 RUN chmod +x start-services.sh
 
 CMD ["bash", "./start-services.sh"]

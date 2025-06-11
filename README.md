@@ -17,6 +17,8 @@ cd cvmatcher
 ```
 or unzip the downloaded source code in your desired workspace.
 
+#### Using Terminal
+
 #### Build Docker Container
 Make sure that Docker Desktop is running, then open a terminal in the directory *cv_matcher* and run the following command to build the docker container. 
 
