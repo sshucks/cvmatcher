@@ -3,7 +3,9 @@ import sys
 import pprint
 import os
 import pandas as pd
-from src.config import CV_OUTPUT_DIR, CV_OUTPUT_DIR_MATCHING
+import fitz
+import re
+from src.config import CV_INPUT_DIR, CV_OUTPUT_DIR_MATCHING
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from matching.match_requirements import Model
@@ -165,6 +167,29 @@ def calculate_score(applicant_data, requirements_data,
             "Birthdate": personal_information["birthdate"],
             "Score": final_score}
 
+def get_mail(file: str) -> str:
+    """ Extract mail from applicant from pdf document
+
+    :param file: string containing file path to processed .json
+    :type file: str
+    :return: mail address from applicant
+    :rtype: str
+    """
+
+    file_pdf = file.replace("_processed.json", ".pdf")
+
+    pdf_text = ""
+    with fitz.open(filename=file_pdf) as pdf:
+        for page_num in range(pdf.page_count):
+            pdf_text += pdf[page_num].get_text()
+
+    mail = re.findall(r"\b[\w.-]+@[\w.-]+\.\w+\b", pdf_text)[0]
+    mail = "mailto:" + mail
+
+    return mail
+
+
+
 def match_applicant(file, work_weight, skill_weight, personal_weight, education_weight, n):
     print(type(file))
     score_dict = {}
@@ -175,10 +200,10 @@ def match_applicant(file, work_weight, skill_weight, personal_weight, education_
     education_weight = education_weight / total_weights
     position_name, skill_list, personal_skills_list, qualification_list, education_requirements = extract_requirement(file.file)
     requirements_data = calculate_requirement_embeddings(position_name, 
-                                                                                                                        skill_list,
-                                                                                                                        personal_skills_list, 
-                                                                                                                        qualification_list, 
-                                                                                                                education_requirements)
+                                                         skill_list,
+                                                         personal_skills_list, 
+                                                         qualification_list, 
+                                                         education_requirements)
     score_dict = {}
     try:
         for i, applicant in enumerate(sorted(os.listdir(CV_OUTPUT_DIR_MATCHING))):
@@ -187,14 +212,15 @@ def match_applicant(file, work_weight, skill_weight, personal_weight, education_
                 score = calculate_score(os.path.join(CV_OUTPUT_DIR_MATCHING, applicant), requirements_data, 
                                         position_name, skill_list, personal_skills_list, qualification_list, education_requirements,
                                         work_weight, skill_weight, personal_weight, education_weight)
-                #print(score)
+                email = get_mail(os.path.join(CV_INPUT_DIR, applicant))
                 score_dict[score["Name"]] = {"Score": score["Score"],
-                                         "Birthdate": score["Birthdate"],
-                                         "Filename": applicant} 
+                                             "Birthdate": score["Birthdate"],
+                                             "Filename": applicant,
+                                             "E-Mail": email} 
             except Exception as e:
                 print(f"Calculation for {applicant} did not work because {e}")    
     
-        result_df = pd.DataFrame.from_dict(score_dict, orient='index', columns=['Score', 'Birthdate', 'Filename']).reset_index()
+        result_df = pd.DataFrame.from_dict(score_dict, orient='index', columns=['Score', 'Birthdate', 'Filename', 'E-Mail']).reset_index()
         result_df.rename(columns={'index': 'Name'}, inplace=True)
         result_df = result_df.sort_values(by='Score', ascending=False).head(n)    
         return result_df

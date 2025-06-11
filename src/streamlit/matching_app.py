@@ -62,7 +62,8 @@ if apply:
 
         if response.status_code == 200:
             results = response.json().get("results", [])
-            col1.dataframe(results)
+            col1.dataframe(results, column_config={"E-Mail": st.column_config.LinkColumn(display_text="E-Mail")})
+
         else:
             col1.error(f"Error: {response.status_code} - {response.json().get('error')}")
     else:
