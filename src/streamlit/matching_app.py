@@ -44,8 +44,13 @@ col1_1, col1_2 = col1.columns(2)
 cv_path = "input_cvs"
 
 with col1:
-    requirements = st.file_uploader(label="Upload requirements", type=['doc','docx'])
-    cvs = st.file_uploader("CVs", accept_multiple_files=True, type=['doc','docx', "pdf"])
+    requirements = st.file_uploader('Upload requirements')
+    # start new
+    cvs = st.file_uploader('Upload cvs', accept_multiple_files=True, type=["pdf", "docx"])
+
+    col1.write('## Matching results')
+
+# end new
 
 
 with col2:
@@ -80,7 +85,13 @@ if apply:
         files_to_send.extend(cv_files_list)
         
         # Prepare data for API call
-        files = {"requirements": requirements.getvalue()}
+        files = [("requirements", (requirements.name, requirements, requirements.type))]
+
+        if cvs:
+            for file in cvs:
+                files.append(("input_cvs", (file.name, file, file.type)))
+
+
         data = {
             "edu_weight": edu_weight,
             "exp_weight": exp_weight,

@@ -1,4 +1,5 @@
 from fastapi import FastAPI, UploadFile, Form, File
+from typing import List
 from fastapi.responses import JSONResponse
 import pandas as pd
 import sys
@@ -16,10 +17,18 @@ def call_matching(requirements, edu_weight, exp_weight, pro_weight, per_weight, 
     print(results)
     return results
 
+def save_input_cvs(input_cvs):
+    for cv in input_cvs:
+        file_path = os.path.join("input_cvs", cv.filename)
+        with open(file_path, "wb") as f:
+            f.write(cv.file.read())
+    return 
+
 
 @app.post("/process")
 async def process_matching(
     requirements: UploadFile = File(...),
+    input_cvs: List[UploadFile] = File(...),
     edu_weight: int = Form(...),
     exp_weight: int = Form(...),
     pro_weight: int = Form(...),
@@ -27,10 +36,11 @@ async def process_matching(
     n: int = Form(...)
 ):
     try:
-        file_content = await requirements.read()
-        
-        # TODO: store CVs in filesystem and calculate hash and insert into database
-        # TODO: extract CVs using API
+        # Simulate processing the uploaded file
+        print([i.filename for i in input_cvs])
+        save_input_cvs(input_cvs)
+        print(f"Received file: {requirements.filename}")
+        #file_content = await requirements.read()
 
         # Call the matching logic
         results_df = call_matching(requirements, edu_weight, exp_weight, pro_weight, per_weight, n)
