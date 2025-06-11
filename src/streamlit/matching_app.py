@@ -47,10 +47,8 @@ if apply:
 
         if response.status_code == 200:
             results = response.json().get("results", [])
-            st.dataframe(results, column_config={"E-Mail": st.column_config.LinkColumn()})
-            #results['E-Mail'] = results.apply(
-             #                           lambda row: '<a href="{}">{}</a>'.format(row['E-Mail'], row['E-Mail']),
-              #                          axis=1)
+            col1.dataframe(results, column_config={"E-Mail": st.column_config.LinkColumn(display_text="E-Mail")})
+
         else:
             col1.error(f"Error: {response.status_code} - {response.json().get('error')}")
     else:
