@@ -7,7 +7,9 @@ import os
 from typing import List
 import hashlib
 
-from src.config import CV_DATABASE
+from src.config import CV_STORAGE
+from caching import get_db
+from caching.models import CachedCVs
 
 
 from typing import List
@@ -23,8 +25,24 @@ def call_matching(requirements, edu_weight, exp_weight, pro_weight, per_weight, 
     print(results)
     return results
 
+def hash_in_database(hash:str) -> bool:
+    """Check in database if CV hash already exists
+
+    :param hash: hash of CV file
+    :type hash: str
+    :return: whether the CV file behind the hash is already stored
+    :rtype: bool
+    """
+    with get_db() as db:
+        # get first result of equal hash value
+        result = db.query(CachedCVs).filter(CachedCVs.cv_hash==str(hash)).first()
+        
+        # return if result exists
+        return True if result else False
+    
+
 def save_input_cvs(input_cvs:List[UploadFile]) -> list:
-    """Store all provided CVs
+    """Store provided CVs, if they don't already exists (check via file hash)
 
     :param input_cvs: List of CVs to store
     :type input_cvs: List[UploadFile]
@@ -42,14 +60,27 @@ def save_input_cvs(input_cvs:List[UploadFile]) -> list:
         hash_digest = generate_file_hash(cv.file)
         hash_values.append(hash_digest)
         
-        # generate new file name
-        suffix = str(cv.filename).split('.')[-1]
-        file_name =f"{hash_digest}.{suffix}"
+        # check if hash already exists
+        file_exists = hash_in_database(hash_digest)
         
-        # store input file in file system    
-        file_path = os.path.join(CV_DATABASE, file_name)
-        with open(file_path, "wb") as f:
-            f.write(cv.file.read())
+        if file_exists:
+            # TODO: implement logging
+            print(f"{hash_digest} already exsits, SKIPPING")
+        else:
+            # generate new file name
+            suffix = str(cv.filename).split('.')[-1]
+            file_name =f"{hash_digest}.{suffix}"
+            
+            # store input file in file system    
+            file_path = os.path.join(CV_STORAGE, file_name)
+            with open(file_path, "wb") as f:
+                f.write(cv.file.read())
+            
+            # write cached CV to database
+            with get_db() as db:
+                cv_entry = CachedCVs(cv_hash=hash_digest, path=file_name)
+                db.add(cv_entry)
+                db.commit()
     
     # return hash values for further usage
     return hash_values

@@ -1,9 +1,6 @@
-from sqlalchemy import Table, Column, Integer, BLOB, String, ForeignKey, UniqueConstraint, BOOLEAN, \
-    ForeignKeyConstraint, Float
-from sqlalchemy.orm import declarative_base, relationship, backref
+from sqlalchemy import Column, Integer, String, UniqueConstraint, Float
+from sqlalchemy.orm import declarative_base
 from sqlalchemy.engine import Engine
-
-import app
 
 Base = declarative_base()
 
@@ -29,7 +26,7 @@ class CachedCVs(Base):
     
     # define constraints
     __table_args__ = (
-        UniqueConstraint('path', name="unique_path")
+        UniqueConstraint('path', name="unique_path"),
     )
     
     # define string representation of object
