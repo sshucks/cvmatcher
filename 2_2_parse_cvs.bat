@@ -1,14 +1,15 @@
 @echo off
 
 set CONTAINER_NAME=cvmatcher
+set IMAGE_NAME=cvmatcher-dev
 
-docker ps --filter "name=%CONTAINER_NAME%" --filter "status=running" --format "{{.Names}}" | findstr /i "%CONTAINER_NAME%" >nul
-
+REM Check if container exists
+docker ps -a --filter "name=%CONTAINER_NAME%" --format "{{.Names}}" | findstr /i "%CONTAINER_NAME%" >nul
 if %ERRORLEVEL%==0 (
-    echo Container %CONTAINER_NAME% is already running.
+        docker start %CONTAINER_NAME%
 ) else (
-    echo Container %CONTAINER_NAME% is not running. Starting it...
-    docker start %CONTAINER_NAME%
+    echo Creating and running new container %CONTAINER_NAME%...
+    docker run -it -p 8501:8501 -p 8000:8000 -v "%cd%:/workspaces/cvmatcher" -w /workspaces/cvmatcher -e PYTHONPATH=/workspaces/cvmatcher --name %CONTAINER_NAME% %IMAGE_NAME%
 )
 
 docker exec -it %CONTAINER_NAME% python src/extracting/extraction_main.py

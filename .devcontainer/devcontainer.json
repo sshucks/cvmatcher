@@ -6,8 +6,9 @@
   "containerEnv": {
     "PYTHONPATH": "/workspaces/cvmatcher"
   },
-  "postStartCommand": "chmod +x start-services.sh; start-services.sh",
   "remoteUser": "root",
+  "workspaceFolder": "/workspaces/cvmatcher",
+  "postStartCommand": "./start-services.sh",
   "customizations": {
     "vscode": {
       "extensions": [
