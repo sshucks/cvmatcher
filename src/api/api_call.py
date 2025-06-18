@@ -7,9 +7,13 @@ import os
 from typing import List
 import hashlib
 
-from src.config import CV_STORAGE
+from src.config import CV_INPUT_DIR, CV_OUTPUT_DIR, CV_OUTPUT_DIR_MATCHING
 from caching import get_db
 from caching.models import CachedCVs
+from src.caching.CachedCV_Wrapper import CachedCV_Wrapper
+
+from tqdm import tqdm
+
 
 
 from typing import List
@@ -17,6 +21,8 @@ from typing import List
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from matching.match_applicants import match_applicant
+from extracting.cv.process_cvs import convert_docx_to_pdf, process_cv_php
+from extracting.read_json import read_json_file, save_json
 
 app = FastAPI()
 
@@ -39,9 +45,28 @@ def hash_in_database(hash:str) -> bool:
         
         # return if result exists
         return True if result else False
-    
 
-def save_input_cvs(input_cvs:List[UploadFile]) -> list:
+async def store_cv(hash:str, file_name:str, file_path:str, cv:UploadFile):
+    
+    # check file type
+    file_suffix = file_name.split(".")[-1].lower() 
+    
+    match file_suffix:
+        case "pdf":
+            with open(file_path, "wb") as f:
+                f.write(cv.file.read())
+                
+        
+        case "docx":
+            await convert_docx_to_pdf(cv, hash, CV_INPUT_DIR)
+        
+        case _:
+            pass
+        
+        
+
+
+async def save_input_cvs(input_cvs:List[UploadFile]) -> list:
     """Store provided CVs, if they don't already exists (check via file hash)
 
     :param input_cvs: List of CVs to store
@@ -51,39 +76,48 @@ def save_input_cvs(input_cvs:List[UploadFile]) -> list:
     :rtype: list of str 
     """
     
-    hash_values = []
+    results = []
     
     # for every file
     for cv in input_cvs:
         
         # generate hash value
         hash_digest = generate_file_hash(cv.file)
-        hash_values.append(hash_digest)
         
         # check if hash already exists
         file_exists = hash_in_database(hash_digest)
         
+        # generate new file name
+        suffix = str(cv.filename).split('.')[-1]
+        file_name =f"{hash_digest}.{suffix}"
+            
+        # put together path for file location 
+        file_path = os.path.join(CV_INPUT_DIR, file_name)
+        
+        
+        
         if file_exists:
             # TODO: implement logging
+             # add file to results
+            results.append(CachedCV_Wrapper(hash_digest, file_path, True))
             print(f"{hash_digest} already exsits, SKIPPING")
         else:
-            # generate new file name
-            suffix = str(cv.filename).split('.')[-1]
-            file_name =f"{hash_digest}.{suffix}"
-            
-            # store input file in file system    
-            file_path = os.path.join(CV_STORAGE, file_name)
-            with open(file_path, "wb") as f:
-                f.write(cv.file.read())
+            # store the cv in the filesystem
+            await store_cv(hash_digest, file_name, file_path, cv)
             
             # write cached CV to database
             with get_db() as db:
-                cv_entry = CachedCVs(cv_hash=hash_digest, path=file_name)
+                cv_entry = CachedCVs(cv_hash=hash_digest, path=file_path)
                 db.add(cv_entry)
                 db.commit()
+            
+            if "docx" in file_path:
+                file_path = file_path.replace("docx","pdf")
+                
+            results.append(CachedCV_Wrapper(hash_digest, file_path, False))
     
     # return hash values for further usage
-    return hash_values
+    return results
 
 def generate_file_hash(file: UploadFile) -> str:
     """Calculate the hash value of a file
@@ -102,6 +136,18 @@ def generate_file_hash(file: UploadFile) -> str:
     # return hex representation of hash
     return digest.hexdigest()
 
+
+def extract_cvs(cvs:list):
+    to_extract = [cv for cv in cvs if cv.is_extracted]
+    [print(str(i)) for i in to_extract]
+    for cv in tqdm(to_extract):
+        output_file = os.path.join(CV_OUTPUT_DIR, f"{os.path.splitext(cv.get_hash_digest())[0]}_processed.json")
+        process_cv_php(cv.get_file_path(), output_file)
+        
+        cv = read_json_file(output_file)
+        save_json(os.path.join(CV_OUTPUT_DIR_MATCHING, os.path.basename(output_file)), cv)
+        
+    
 
 @app.post("/process")
 async def process_matching(
@@ -133,15 +179,20 @@ async def process_matching(
     :rtype: JSON
     """
     try:
-        # TODO: store CVs in filesystem and calculate hash and insert into database
-        file_hashes = save_input_cvs(input_cvs)
+        # store CVs in filesystem and calculate hash and insert into database
+        files_for_matching = await save_input_cvs(input_cvs)
+        print(files_for_matching)
         
-        # TODO: extract CVs using API
+        
+        # extract CVs using API, and store json results
+        extract_cvs(files_for_matching)
+        
+        applicants = [applicant.get_file_path() for applicant in files_for_matching]
 
-        # Call the matching logic
+        # call the matching logic
         results_df = call_matching(requirements, edu_weight, exp_weight, pro_weight, per_weight, n)
         
-        # Return the results as JSON
+        # return the results as JSON
         return JSONResponse(content={"results": results_df.to_dict(orient="records")})
     except Exception as e:
         print(e)

@@ -5,7 +5,7 @@ import contextlib
 
 from src.config import DATABASE_URL
 
-from .models import Base
+from src.caching.models import Base
 
 import os
 
