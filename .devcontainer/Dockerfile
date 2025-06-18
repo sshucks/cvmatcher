@@ -12,7 +12,6 @@ RUN apt-get update && apt-get install -y \
     git \
     ca-certificates \
     tmux \
-    libreoffice \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
