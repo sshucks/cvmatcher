@@ -3,7 +3,7 @@ import sys
 import pprint
 import os
 import pandas as pd
-import fitz
+import pymupdf
 import re
 from src.config import CV_INPUT_DIR, CV_OUTPUT_DIR_MATCHING
 
@@ -179,12 +179,15 @@ def get_mail(file: str) -> str:
     file_pdf = file.replace("_processed.json", ".pdf")
 
     pdf_text = ""
-    with fitz.open(filename=file_pdf) as pdf:
-        for page_num in range(pdf.page_count):
-            pdf_text += pdf[page_num].get_text()
+    with pymupdf.open(filename=file_pdf) as pdf:
+        for page in pdf:
+            pdf_text += page.get_text()
 
-    mail = re.findall(r"\b[\w.-]+@[\w.-]+\.\w+\b", pdf_text)[0]
-    mail = "mailto:" + mail
+    try:
+        mail = re.findall(r"\b[\w.-]+@[\w.-]+\.\w+\b", pdf_text)[0]
+        mail = "mailto:" + mail
+    except IndexError:
+        mail = ""
 
     return mail
 
