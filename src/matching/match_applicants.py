@@ -199,16 +199,27 @@ def match_applicant(file, work_weight, skill_weight, personal_weight, education_
     personal_weight = personal_weight / total_weights
     education_weight = education_weight / total_weights
     position_name, skill_list, personal_skills_list, qualification_list, education_requirements = extract_requirement(file.file)
-    requirements_data = calculate_requirement_embeddings(position_name, 
-                                                         skill_list,
-                                                         personal_skills_list, 
-                                                         qualification_list, 
-                                                         education_requirements)
+
+    warnings = []
+    if not skill_list:
+        warnings.append("No skills found. Either the requirements file does not use the correct heading or there are no skills listed.\nTry using 'Erfolgskritische Faktoren für die Position' or 'Aufgabe' as heading.")
+    if not personal_skills_list:
+        warnings.append("No personal skills found. Either the requirements file does not use the correct heading or there are no personal skills listed.\nTry using 'Persönliche Anforderungen und Kompetenzen' or 'Persönliche Kompetenz' as heading.")
+    if not qualification_list:
+        warnings.append("No qualifications found. Either the requirements file does not use the correct heading or there are no qualifications listed.\nTry using 'Fachliche Qualifikationen und Kompetenzen' or 'Fachliche Anforderungen' as heading.")
+    if not education_requirements:
+        warnings.append("No education requirements found. Either the requirements file does not use the correct heading or there are no education requirements listed.\nTry using 'Formale Ausbildung' as heading. Note that this should be listed in qualification section ('Fachliche Qualifikationen und Kompetenzen' or 'Fachliche Anforderungen').")
+
+    try:
+        requirements_data = calculate_requirement_embeddings(position_name, 
+            skill_list,personal_skills_list, qualification_list, education_requirements)
+    except Exception as e:
+        return None, warnings
+
     score_dict = {}
     try:
         for i, applicant in enumerate(sorted(os.listdir(CV_OUTPUT_DIR_MATCHING))):
             try:
-
                 score = calculate_score(os.path.join(CV_OUTPUT_DIR_MATCHING, applicant), requirements_data, 
                                         position_name, skill_list, personal_skills_list, qualification_list, education_requirements,
                                         work_weight, skill_weight, personal_weight, education_weight)
@@ -223,6 +234,6 @@ def match_applicant(file, work_weight, skill_weight, personal_weight, education_
         result_df = pd.DataFrame.from_dict(score_dict, orient='index', columns=['Score', 'Birthdate', 'Filename', 'E-Mail']).reset_index()
         result_df.rename(columns={'index': 'Name'}, inplace=True)
         result_df = result_df.sort_values(by='Score', ascending=False).head(n)    
-        return result_df
+        return result_df, warnings
     except Exception as e:
-        print(e) 
+        print(e)

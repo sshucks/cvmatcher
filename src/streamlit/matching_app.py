@@ -66,5 +66,9 @@ if apply:
 
         else:
             col1.error(f"Error: {response.status_code} - {response.json().get('error')}")
+
+        if response.json().get("warnings"):
+            for warning in response.json().get("warnings"):
+                col1.warning(warning)
     else:
         col1.error("Please upload a requirements file.")
