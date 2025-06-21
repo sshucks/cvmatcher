@@ -3,11 +3,13 @@ import sys
 import pprint
 import os
 import pandas as pd
-import fitz
 import re
 from fastapi import UploadFile
 
 
+import pymupdf
+import re
+from src.config import CV_INPUT_DIR, CV_OUTPUT_DIR_MATCHING
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from matching.match_requirements import Model
@@ -189,12 +191,16 @@ def get_mail(file: str) -> str:
     file_pdf = file.replace("_processed.json", ".pdf")
 
     pdf_text = ""
-    with fitz.open(filename=file_pdf) as pdf:
-        for page_num in range(pdf.page_count):
-            pdf_text += pdf[page_num].get_text()
 
-    mail = re.findall(r"\b[\w.-]+@[\w.-]+\.\w+\b", pdf_text)[0]
-    mail = "mailto:" + mail
+    with pymupdf.open(filename=file_pdf) as pdf:
+        for page in pdf:
+            pdf_text += page.get_text()
+
+    try:
+        mail = re.findall(r"\b[\w.-]+@[\w.-]+\.\w+\b", pdf_text)[0]
+        mail = "mailto:" + mail
+    except IndexError:
+        mail = ""
 
     return mail
 
@@ -220,6 +226,7 @@ def match_applicant(file:UploadFile, work_weight:int, skill_weight:int, personal
     """
         
     # normalize weights
+
     total_weights = work_weight + skill_weight + personal_weight + education_weight
     work_weight = work_weight / total_weights
     skill_weight = skill_weight / total_weights
@@ -234,6 +241,7 @@ def match_applicant(file:UploadFile, work_weight:int, skill_weight:int, personal
                                                          qualification_list, education_requirements)
     
     # score applicants
+
     score_dict = {}
     try:
         # calculate score for each applicant in selection
@@ -260,6 +268,7 @@ def match_applicant(file:UploadFile, work_weight:int, skill_weight:int, personal
 
         # combine results into dataframe and return top n scoring entries
         result_df = pd.DataFrame.from_dict(score_dict, orient='index', columns=['Score', 'Birthdate', 'Filename']).reset_index()
+
         result_df.rename(columns={'index': 'Name'}, inplace=True)
         result_df = result_df.sort_values(by='Score', ascending=False).head(n)    
         return result_df

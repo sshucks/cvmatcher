@@ -43,11 +43,14 @@ col2.write("## Parameters")
 col3.write("## Matching Results")
 
 
+cv_path = "input_cvs"
+
 with col1:
     requirements = st.file_uploader('Upload requirements')
     # start new
     cvs = st.file_uploader('Upload cvs', accept_multiple_files=True, type=["pdf", "docx"])
     # end new
+
 
 
 with col2:
@@ -109,6 +112,7 @@ if apply:
         if response.status_code == 200:
             results = response.json().get("results", [])
             col3.dataframe(results, column_config={"E-Mail": st.column_config.LinkColumn(display_text="E-Mail")})
+
 
         else:
             col3.error(f"Error: {response.status_code} - {response.json().get('error')}")

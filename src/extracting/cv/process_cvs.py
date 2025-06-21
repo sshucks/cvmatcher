@@ -24,6 +24,7 @@ def process_cvs_with_php(input_directory, output_directory, php_script_path):
     os.makedirs(output_directory, exist_ok=True)
     print("Starting CV extraction ...")
     #convert_docx_to_pdf(input_directory)
+
     for filename in tqdm(os.listdir(input_directory)):
         if filename.lower().endswith('.pdf'):
             file_path = os.path.join(input_directory, filename)
@@ -58,6 +59,7 @@ def convert_docx_to_pdf(path:str):
     :param path: directory in which to convert the docx documents to pdf
     :type path: str
     """
+
     files = os.listdir(path)
     for filename in files:
         if filename.endswith(".docx"):
