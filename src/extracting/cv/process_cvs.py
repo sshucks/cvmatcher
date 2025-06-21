@@ -84,7 +84,7 @@ async def convert_docx_to_pdf(file:UploadFile, new_name:str, output_dir:str):
     # parse the extension from input file for dynamic conversion
     input_extension = file.filename.split(".")[-1]
     
-    # store
+    # store data in temporary file
     temp_input_file = None
     
     # try to convert

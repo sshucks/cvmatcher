@@ -100,13 +100,27 @@ def read_json(input_dir, output_dir):
     save_cvs(cvs, output_dir)
     print("CV preprocessing completed.")
 
-def read_json_file(file:str):
-    with open(file, 'r') as f:
+def read_json_file(file_path:str):
+    """Read the specified JSON file and extract information.
+
+    :param file_path: file path of JSON file
+    :type file_path: str
+    :return: extracted information of provided file
+    :rtype: JSON
+    """
+    with open(file_path, 'r') as f:
         cv = copy.deepcopy(CV_STRUCTURE)
         cv_data = json.load(f)['data']
         cv = extract_data(cv_data, cv)
     return cv
 
-def save_json(file:str, cv):
-        with open(file, 'w') as json_file:
-            json.dump(cv, json_file, indent=4)
+def save_json(file_path:str, data):
+    """Store provided data and the specifed loction
+
+    :param file_path: location in file system where to store the data
+    :type file_path: str
+    :param data: extracted data
+    :type data: JSON
+    """
+    with open(file_path, 'w') as json_file:
+        json.dump(data, json_file, indent=4)

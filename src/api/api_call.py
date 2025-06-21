@@ -5,7 +5,6 @@ import pandas as pd
 import sys
 import os
 from typing import List
-import hashlib
 
 from src.config import CV_INPUT_DIR, CV_OUTPUT_DIR, CV_OUTPUT_DIR_MATCHING
 from caching import get_db
@@ -23,11 +22,12 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from matching.match_applicants import match_applicant
 from extracting.cv.process_cvs import convert_docx_to_pdf, process_cv_php
 from extracting.read_json import read_json_file, save_json
+from matching.utils import generate_file_hash
 
 app = FastAPI()
 
-def call_matching(requirements, edu_weight, exp_weight, pro_weight, per_weight, n):
-    results = match_applicant(requirements, exp_weight, pro_weight, per_weight, edu_weight, n)
+def call_matching(requirements, edu_weight, exp_weight, pro_weight, per_weight, n, applicants):
+    results = match_applicant(requirements, exp_weight, pro_weight, per_weight, edu_weight, n, applicants)
     print(results)
     return results
 
@@ -46,19 +46,29 @@ def hash_in_database(hash:str) -> bool:
         # return if result exists
         return True if result else False
 
-async def store_cv(hash:str, file_name:str, file_path:str, cv:UploadFile):
-    
+async def store_cv(hash:str, file_name:str, output_dir:str, file:UploadFile):
+    """Store the provided file in the filesystem. If it is DOCX, convert to PDF first.
+
+    :param hash: hash value of file
+    :type hash: str
+    :param file_name: file_name of the provided file
+    :type file_name: str
+    :param output_dir: location (directory) where to store the file
+    :type output_dir: str
+    :param file: document to store
+    :type file: UploadFile
+    """
     # check file type
     file_suffix = file_name.split(".")[-1].lower() 
+    file_path = os.path.join(output_dir, file_name)
     
     match file_suffix:
         case "pdf":
             with open(file_path, "wb") as f:
-                f.write(cv.file.read())
-                
+                f.write(file.file.read())
         
         case "docx":
-            await convert_docx_to_pdf(cv, hash, CV_INPUT_DIR)
+            await convert_docx_to_pdf(file=file, new_name=hash, output_dir=CV_INPUT_DIR)
         
         case _:
             pass
@@ -94,8 +104,6 @@ async def save_input_cvs(input_cvs:List[UploadFile]) -> list:
         # put together path for file location 
         file_path = os.path.join(CV_INPUT_DIR, file_name)
         
-        
-        
         if file_exists:
             # TODO: implement logging
              # add file to results
@@ -103,11 +111,11 @@ async def save_input_cvs(input_cvs:List[UploadFile]) -> list:
             print(f"{hash_digest} already exsits, SKIPPING")
         else:
             # store the cv in the filesystem
-            await store_cv(hash_digest, file_name, file_path, cv)
+            await store_cv(hash=hash_digest, file_name=file_name, output_dir=CV_INPUT_DIR, file=cv)
             
             # write cached CV to database
             with get_db() as db:
-                cv_entry = CachedCVs(cv_hash=hash_digest, path=file_path)
+                cv_entry = CachedCVs(cv_hash=hash_digest, path=file_path, file_name=cv.filename)
                 db.add(cv_entry)
                 db.commit()
             
@@ -119,31 +127,25 @@ async def save_input_cvs(input_cvs:List[UploadFile]) -> list:
     # return hash values for further usage
     return results
 
-def generate_file_hash(file: UploadFile) -> str:
-    """Calculate the hash value of a file
-
-    :param file: file for hash value calculation
-    :type file: UploadFile
-    :return: hex representation of hash code
-    :rtype: str
-    """
-    # calculate hashcode
-    digest = hashlib.file_digest(file, "sha256")
-    
-    # reset pointer to beginning of file, for further consumption
-    file.seek(0)
-    
-    # return hex representation of hash
-    return digest.hexdigest()
-
 
 def extract_cvs(cvs:list):
-    to_extract = [cv for cv in cvs if cv.is_extracted]
-    [print(str(i)) for i in to_extract]
+    """Extract structured information from the documents using external API. Automatically skip already extracted documents.
+
+    :param cvs: list of documents to extract
+    :type cvs: list
+    """
+    
+    # filter for files that are not extracted
+    to_extract = [cv for cv in cvs if not cv.is_extracted()]
+    
+    # extract structured information from files
     for cv in tqdm(to_extract):
+        
+        # make API call to extract information and store response JSON
         output_file = os.path.join(CV_OUTPUT_DIR, f"{os.path.splitext(cv.get_hash_digest())[0]}_processed.json")
         process_cv_php(cv.get_file_path(), output_file)
         
+        # read response JSON from file, process it and store it in final destination
         cv = read_json_file(output_file)
         save_json(os.path.join(CV_OUTPUT_DIR_MATCHING, os.path.basename(output_file)), cv)
         
@@ -153,6 +155,7 @@ def extract_cvs(cvs:list):
 async def process_matching(
     requirements: UploadFile = File(...),
     input_cvs: List[UploadFile] = File(...),
+    all_cvs: bool = Form(...),
     edu_weight: int = Form(...),
     exp_weight: int = Form(...),
     pro_weight: int = Form(...),
@@ -165,6 +168,8 @@ async def process_matching(
     :type requirements: UploadFile
     :param input_cvs: List of CVs that are used in the scoring, if empty, whole database will be used
     :type input_cvs: List[UploadFile]
+    :param all_cvs: whether to use all CVs in the database or only the provided input cvs
+    :type all_cvs: bool
     :param edu_weight: weight of education
     :type edu_weight: int
     :param exp_weight: weight of working experience
@@ -183,14 +188,20 @@ async def process_matching(
         files_for_matching = await save_input_cvs(input_cvs)
         print(files_for_matching)
         
-        
         # extract CVs using API, and store json results
         extract_cvs(files_for_matching)
         
-        applicants = [applicant.get_file_path() for applicant in files_for_matching]
+        # determine the applicants to score
+        applicants = None
+        if all_cvs:
+            # use all CVs in database
+            applicants = os.listdir(CV_OUTPUT_DIR_MATCHING)
+        else: 
+            # use only provided CVs
+            applicants = [applicant.get_extracted_path() for applicant in files_for_matching]
 
         # call the matching logic
-        results_df = call_matching(requirements, edu_weight, exp_weight, pro_weight, per_weight, n)
+        results_df = call_matching(requirements, edu_weight, exp_weight, pro_weight, per_weight, n, applicants)
         
         # return the results as JSON
         return JSONResponse(content={"results": results_df.to_dict(orient="records")})

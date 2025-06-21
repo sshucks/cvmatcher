@@ -12,6 +12,7 @@ class CachedCVs(Base):
     Attributes:
         cv_hash (str): hash of CV file
         path (str): location of CV file
+        file_name (str): original name of file
         
     Constraints:
         path (str): location of CV file has to be unique
@@ -23,6 +24,7 @@ class CachedCVs(Base):
     # define columns
     cv_hash = Column(String, primary_key=True)
     path = Column(String, nullable=False)
+    file_name = Column(String, nullable=False)
     
     # define constraints
     __table_args__ = (
@@ -31,7 +33,7 @@ class CachedCVs(Base):
     
     # define string representation of object
     def __repr__(self):
-        return f"CachedCV: cv_hash='{self.cv_hash}', path='{self.path}'"
+        return f"CachedCV: cv_hash='{self.cv_hash}', path='{self.path}', file_name={self.file_name}"
 
 class Requirement_CV_Matching(Base):
     """Model class for caching matching of requirement file and CV. 
