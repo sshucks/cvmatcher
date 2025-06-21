@@ -3,6 +3,10 @@ import sys
 import pprint
 import os
 import pandas as pd
+import re
+from fastapi import UploadFile
+
+
 import pymupdf
 import re
 from src.config import CV_INPUT_DIR, CV_OUTPUT_DIR_MATCHING
@@ -10,6 +14,10 @@ from src.config import CV_INPUT_DIR, CV_OUTPUT_DIR_MATCHING
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from matching.match_requirements import Model
 from extracting.requirements_profile.extract_requirements import extract_requirement
+from .utils import parse_custom_date, generate_file_hash
+from src.config import CV_INPUT_DIR, CV_OUTPUT_DIR_MATCHING
+from caching import get_db
+from caching.models import CachedCVs, Requirement_CV_Matching
 
 
 model = Model("google-bert/bert-base-german-cased")
@@ -165,6 +173,10 @@ def calculate_score(applicant_data, requirements_data,
     return {"Name": personal_information["firstname"] + " " + personal_information["surname"],
             "Gender": personal_information["gender"],
             "Birthdate": personal_information["birthdate"],
+            "work_score": work_score,
+            "skill_score":skill_score,
+            "personal_score":personal_score,
+            "education_score": education_score,
             "Score": final_score}
 
 def get_mail(file: str) -> str:
@@ -179,6 +191,7 @@ def get_mail(file: str) -> str:
     file_pdf = file.replace("_processed.json", ".pdf")
 
     pdf_text = ""
+
     with pymupdf.open(filename=file_pdf) as pdf:
         for page in pdf:
             pdf_text += page.get_text()
@@ -192,38 +205,70 @@ def get_mail(file: str) -> str:
     return mail
 
 
+def match_applicant(file:UploadFile, work_weight:int, skill_weight:int, personal_weight:int, education_weight:int, n:int, applicants:list) -> pd.DataFrame:
+    """ Match all applicants in the database against the provided requirements. 
+    The weights of each area (work, skills personal and education) are normalised by dividing by the sum of all weights
+    
+    :param file: (docx) file containing requirements for the matching applicants
+    :type file: starlette.datastructures.UploadFile
+    :param work_weight: weight of work experience
+    :type work_weight: int
+    :param skill_weight: weight of skills
+    :type skill_weight: int
+    :param personal_weight: weigth of personal skills
+    :type personal_weight: int
+    :param education_weight: weight of education
+    :type education_weight: int
+    :param n: number of top applicants to return
+    :type n: int
+    :return: table of top n applicants according to their score, including personal information 
+    :rtype: pd.DataFrame
+    """
+        
+    # normalize weights
 
-def match_applicant(file, work_weight, skill_weight, personal_weight, education_weight, n):
-    print(type(file))
-    score_dict = {}
     total_weights = work_weight + skill_weight + personal_weight + education_weight
     work_weight = work_weight / total_weights
     skill_weight = skill_weight / total_weights
     personal_weight = personal_weight / total_weights
     education_weight = education_weight / total_weights
+    
+    # parse requirements file and extract information
     position_name, skill_list, personal_skills_list, qualification_list, education_requirements = extract_requirement(file.file)
-    requirements_data = calculate_requirement_embeddings(position_name, 
-                                                         skill_list,
-                                                         personal_skills_list, 
-                                                         qualification_list, 
-                                                         education_requirements)
+    
+    # calculate embeddings of extracted informaton
+    requirements_data = calculate_requirement_embeddings(position_name, skill_list, personal_skills_list, 
+                                                         qualification_list, education_requirements)
+    
+    # score applicants
+
     score_dict = {}
     try:
-        for i, applicant in enumerate(sorted(os.listdir(CV_OUTPUT_DIR_MATCHING))):
+        # calculate score for each applicant in selection
+        # TODO: parallelize here
+        for i, applicant in enumerate(sorted(applicants)):
+                
             try:
-
+                applicant_hash = str(applicant).split('_')[0]
+                with get_db() as db:
+                    entry = db.query(CachedCVs).filter(CachedCVs.cv_hash==applicant_hash).first()
+                    
+                # calculate score
                 score = calculate_score(os.path.join(CV_OUTPUT_DIR_MATCHING, applicant), requirements_data, 
                                         position_name, skill_list, personal_skills_list, qualification_list, education_requirements,
                                         work_weight, skill_weight, personal_weight, education_weight)
                 email = get_mail(os.path.join(CV_INPUT_DIR, applicant))
                 score_dict[score["Name"]] = {"Score": score["Score"],
-                                             "Birthdate": score["Birthdate"],
-                                             "Filename": applicant,
+                                             "Birthdate": parse_custom_date(score["Birthdate"]),
+                                             "Filename": entry.file_name,
                                              "E-Mail": email} 
+               
             except Exception as e:
                 print(f"Calculation for {applicant} did not work because {e}")    
-    
-        result_df = pd.DataFrame.from_dict(score_dict, orient='index', columns=['Score', 'Birthdate', 'Filename', 'E-Mail']).reset_index()
+
+        # combine results into dataframe and return top n scoring entries
+        result_df = pd.DataFrame.from_dict(score_dict, orient='index', columns=['Score', 'Birthdate', 'Filename']).reset_index()
+
         result_df.rename(columns={'index': 'Name'}, inplace=True)
         result_df = result_df.sort_values(by='Score', ascending=False).head(n)    
         return result_df
