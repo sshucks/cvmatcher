@@ -113,3 +113,9 @@ python -m fastapi dev src/api/api_call.py
 ```
 python -m streamlit run src/streamlit/matching_app.py
 ```
+
+#### Create Databse
+The database has to be created once.
+```
+PYTHONPATH=./src python -m caching.database
+```
