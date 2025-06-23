@@ -205,7 +205,7 @@ def get_mail(file: str) -> str:
     return mail
 
 
-def match_applicant(file:UploadFile, work_weight:int, skill_weight:int, personal_weight:int, education_weight:int, n:int, applicants:list) -> pd.DataFrame:
+def match_applicant(file:UploadFile, work_weight:int, skill_weight:int, personal_weight:int, education_weight:int, n:int, applicants:list) -> tuple[pd.DataFrame, list]:
     """ Match all applicants in the database against the provided requirements. 
     The weights of each area (work, skills personal and education) are normalised by dividing by the sum of all weights
     
@@ -221,8 +221,8 @@ def match_applicant(file:UploadFile, work_weight:int, skill_weight:int, personal
     :type education_weight: int
     :param n: number of top applicants to return
     :type n: int
-    :return: table of top n applicants according to their score, including personal information 
-    :rtype: pd.DataFrame
+    :return: table of top n applicants according to their score, including personal information and list of warnings that were thrwon during exection
+    :rtype: (pd.DataFrame, list)
     """
         
     # normalize weights

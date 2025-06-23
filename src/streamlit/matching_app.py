@@ -81,7 +81,6 @@ if apply:
         # For the list of CVs, create a list of tuples
         cv_files_list = []
         for cv_file in cvs:
-            print("in cv file loop")
             cv_filename = unicodedata.normalize('NFD', cv_file.name).encode('ascii', 'ignore').decode('utf-8')
 
             cv_files_list.append(('cvs', (cv_filename, cv_file.getvalue(), get_mime_type(cv_file.name)))) # Ensure content type matches
@@ -111,14 +110,13 @@ if apply:
 
         if response.status_code == 200:
             results = response.json().get("results", [])
-            col3.dataframe(results, column_config={"E-Mail": st.column_config.LinkColumn(display_text="E-Mail")})
-
-
+            if results != None:
+                col3.dataframe(results, column_config={"E-Mail": st.column_config.LinkColumn(display_text="E-Mail")})
         else:
-            col1.error(f"Error: {response.status_code} - {response.json().get('error')}")
+            col3.error(f"Error: {response.status_code} - {response.json().get('error')}")
 
         if response.json().get("warnings"):
             for warning in response.json().get("warnings"):
-                col1.warning(warning)
+                col3.warning(warning)
     else:
         col3.error("Please upload a requirements file.")
