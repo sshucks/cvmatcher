@@ -166,12 +166,12 @@ python src/extracting/extraction_main.py
 
 #### Start FastAPI
 ```
-PYTHONPATH=./src python -m fastapi dev src/api/api_call.py
+python -m fastapi dev src/api/api_call.py
 ```
 
 #### Start Streamlit App
 ```
-PYTHONPATH=./src python -m streamlit run src/streamlit/matching_app.py
+python -m streamlit run src/streamlit/matching_app.py
 ```
 
 #### Create Databse

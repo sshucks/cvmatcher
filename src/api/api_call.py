@@ -6,8 +6,8 @@ import os
 from typing import List
 
 from src.config import CV_INPUT_DIR, CV_OUTPUT_DIR, CV_OUTPUT_DIR_MATCHING
-from caching import get_db
-from caching.models import CachedCVs
+from src.caching import get_db
+from src.caching.models import CachedCVs
 from src.caching.CachedCV_Wrapper import CachedCV_Wrapper
 
 from tqdm import tqdm
