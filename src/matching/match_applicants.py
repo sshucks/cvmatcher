@@ -205,7 +205,7 @@ def get_mail(file: str) -> str:
     return mail
 
 
-def match_applicant(file:UploadFile, work_weight:int, skill_weight:int, personal_weight:int, education_weight:int, n:int, applicants:list) -> pd.DataFrame:
+def match_applicant(file:UploadFile, work_weight:int, skill_weight:int, personal_weight:int, education_weight:int, n:int, applicants:list) -> tuple[pd.DataFrame, list]:
     """ Match all applicants in the database against the provided requirements. 
     The weights of each area (work, skills personal and education) are normalised by dividing by the sum of all weights
     
@@ -221,8 +221,8 @@ def match_applicant(file:UploadFile, work_weight:int, skill_weight:int, personal
     :type education_weight: int
     :param n: number of top applicants to return
     :type n: int
-    :return: table of top n applicants according to their score, including personal information 
-    :rtype: pd.DataFrame
+    :return: table of top n applicants according to their score, including personal information and list of warnings that were thrwon during exection
+    :rtype: (pd.DataFrame, list)
     """
         
     # normalize weights
@@ -235,12 +235,22 @@ def match_applicant(file:UploadFile, work_weight:int, skill_weight:int, personal
     
     # parse requirements file and extract information
     position_name, skill_list, personal_skills_list, qualification_list, education_requirements = extract_requirement(file.file)
-    
-    # calculate embeddings of extracted informaton
-    requirements_data = calculate_requirement_embeddings(position_name, skill_list, personal_skills_list, 
-                                                         qualification_list, education_requirements)
-    
-    # score applicants
+
+    warnings = []
+    if not skill_list:
+        warnings.append("No skills found. Either the requirements file does not use the correct heading or there are no skills listed.\nTry using 'Erfolgskritische Faktoren für die Position' or 'Aufgabe' as heading.")
+    if not personal_skills_list:
+        warnings.append("No personal skills found. Either the requirements file does not use the correct heading or there are no personal skills listed.\nTry using 'Persönliche Anforderungen und Kompetenzen' or 'Persönliche Kompetenz' as heading.")
+    if not qualification_list:
+        warnings.append("No qualifications found. Either the requirements file does not use the correct heading or there are no qualifications listed.\nTry using 'Fachliche Qualifikationen und Kompetenzen' or 'Fachliche Anforderungen' as heading.")
+    if not education_requirements:
+        warnings.append("No education requirements found. Either the requirements file does not use the correct heading or there are no education requirements listed.\nTry using 'Formale Ausbildung' as heading. Note that this should be listed in qualification section ('Fachliche Qualifikationen und Kompetenzen' or 'Fachliche Anforderungen').")
+
+    try:
+        requirements_data = calculate_requirement_embeddings(position_name, 
+            skill_list,personal_skills_list, qualification_list, education_requirements)
+    except Exception as e:
+        return None, warnings
 
     score_dict = {}
     try:
@@ -271,6 +281,6 @@ def match_applicant(file:UploadFile, work_weight:int, skill_weight:int, personal
 
         result_df.rename(columns={'index': 'Name'}, inplace=True)
         result_df = result_df.sort_values(by='Score', ascending=False).head(n)    
-        return result_df
+        return result_df, warnings
     except Exception as e:
-        print(e) 
+        print(e)

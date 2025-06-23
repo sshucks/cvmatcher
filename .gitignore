@@ -10,4 +10,6 @@ __pycache__/
 **/extracted_cvs_matching/*
 !extracted_cvs_matching/.gitkeep
 
+*.db
+
 **/cv_dicts/*

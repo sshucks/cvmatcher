@@ -5,7 +5,7 @@ from tqdm import tqdm
 from fastapi import UploadFile
 import tempfile
 
-from config import PHP_SCRIPT_CV_EXTRACTION
+from src.config import PHP_SCRIPT_CV_EXTRACTION
 
 def process_cv_php(file_path:str, output_file:str):
     print(file_path)

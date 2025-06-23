@@ -1,21 +1,20 @@
-from fastapi import FastAPI, UploadFile, Form, File
+from fastapi import FastAPI, UploadFile, Form, File, status
 from typing import List
 from fastapi.responses import JSONResponse
-import pandas as pd
 import sys
 import os
 from typing import List
 
 from src.config import CV_INPUT_DIR, CV_OUTPUT_DIR, CV_OUTPUT_DIR_MATCHING
-from caching import get_db
-from caching.models import CachedCVs
+from src.caching import get_db
+from src.caching.models import CachedCVs
 from src.caching.CachedCV_Wrapper import CachedCV_Wrapper
 
 from tqdm import tqdm
 
 
 
-from typing import List
+from typing import List, Optional
 
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -27,9 +26,8 @@ from matching.utils import generate_file_hash
 app = FastAPI()
 
 def call_matching(requirements, edu_weight, exp_weight, pro_weight, per_weight, n, applicants):
-    results = match_applicant(requirements, exp_weight, pro_weight, per_weight, edu_weight, n, applicants)
-    print(results)
-    return results
+    results, warnings = match_applicant(requirements, exp_weight, pro_weight, per_weight, edu_weight, n, applicants)
+    return results, warnings
 
 def hash_in_database(hash:str) -> bool:
     """Check in database if CV hash already exists
@@ -155,7 +153,7 @@ def extract_cvs(cvs:list):
 @app.post("/process")
 async def process_matching(
     requirements: UploadFile = File(...),
-    input_cvs: List[UploadFile] = File(...),
+    input_cvs: Optional[List[UploadFile]] = File(None),
     all_cvs: bool = Form(...),
     edu_weight: int = Form(...),
     exp_weight: int = Form(...),
@@ -186,27 +184,47 @@ async def process_matching(
     :rtype: JSON
     """
     try:
-        # store CVs in filesystem and calculate hash and insert into database
-        files_for_matching = await save_input_cvs(input_cvs)
-        print(files_for_matching)
-        
-        # extract CVs using API, and store json results
-        extract_cvs(files_for_matching)
+        # compute provided CVs if present
+        if input_cvs:
+            # store CVs in filesystem and calculate hash and insert into database
+            files_for_matching = await save_input_cvs(input_cvs)
+            print(files_for_matching)
+            
+            # extract CVs using API, and store json results
+            extract_cvs(files_for_matching)
+        else:
+            print("No input cvs received")
         
         # determine the applicants to score
         applicants = None
         if all_cvs:
-            # use all CVs in database
+             # if the flag for all cvs is checked, use all CVs in database
             applicants = os.listdir(CV_OUTPUT_DIR_MATCHING)
-        else: 
-            # use only provided CVs
+        elif input_cvs: 
+            # if cvs are provided, use only provided CVs
             applicants = [applicant.get_extracted_path() for applicant in files_for_matching]
-
-        # call the matching logic
-        results_df = call_matching(requirements, edu_weight, exp_weight, pro_weight, per_weight, n, applicants)
         
-        # return the results as JSON
-        return JSONResponse(content={"results": results_df.to_dict(orient="records")})
+        # if no CVs are provided and the all CVs flag is not checked, return errors
+        if not all_cvs and not input_cvs:
+            return JSONResponse(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                content={
+                    "results": None,
+                    "error": "Neither a list of CVs was provided nor the option to use all CVs in the database was checked. Please provide some CVs or check the option to use all CVs in the database."
+                }
+            )
+        # Call the matching logic
+        results_df, warnings = call_matching(requirements, edu_weight, exp_weight, pro_weight, per_weight, n, applicants)
+
+        if results_df is None:
+            return JSONResponse(content={"error": "Error while extracting requirements! Check structure of requirements file and try again.", "warnings": warnings}, status_code=500)
+
+        response = JSONResponse(content={
+            "results": results_df.to_dict(orient="records"),
+            "warnings": warnings or None  # Return None if empty
+        })
+
+        return response
     except Exception as e:
         print(e)
         return JSONResponse(content={"error": str(e)}, status_code=500)
