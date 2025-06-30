@@ -277,7 +277,7 @@ def match_applicant(file:UploadFile, work_weight:int, skill_weight:int, personal
                 print(f"Calculation for {applicant} did not work because {e}")    
 
         # combine results into dataframe and return top n scoring entries
-        result_df = pd.DataFrame.from_dict(score_dict, orient='index', columns=['Score', 'Birthdate', 'Filename']).reset_index()
+        result_df = pd.DataFrame.from_dict(score_dict, orient='index', columns=['Score', 'Birthdate', 'Filename', "E-Mail"]).reset_index()
 
         result_df.rename(columns={'index': 'Name'}, inplace=True)
         result_df = result_df.sort_values(by='Score', ascending=False).head(n)    
