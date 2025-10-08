@@ -70,12 +70,8 @@ async def store_cv(hash:str, file_name:str, output_dir:str, file:UploadFile):
         
         case _:
             pass
-        
-        
-
-
 async def save_input_cvs(input_cvs:List[UploadFile]) -> list:
-    """Store provided CVs, if they don't already exists (check via file hash)
+    """Store and extract provided CVs, if they don't already exist (check via file hash)
 
     :param input_cvs: List of CVs to store
     :type input_cvs: List[UploadFile]
@@ -105,49 +101,34 @@ async def save_input_cvs(input_cvs:List[UploadFile]) -> list:
         if file_exists:
             # TODO: implement logging
              # add file to results
-            results.append(CachedCV_Wrapper(hash_digest, file_path, True))
-            print(f"{hash_digest} already exsits, SKIPPING")
+            cv = CachedCV_Wrapper(hash_digest, file_path, True)
+            print(f"{hash_digest} already exists, SKIPPING")
         else:
-            # store the cv in the filesystem
             await store_cv(hash=hash_digest, file_name=file_name, output_dir=CV_INPUT_DIR, file=cv)
             
-            # write cached CV to database
+            if "docx" in file_path:
+                file_path = file_path.replace("docx","pdf")
+
+            extract_cv(file_path, hash_digest)
+
+            # write extracted CV to database
             with get_db() as db:
                 cv_entry = CachedCVs(cv_hash=hash_digest, path=file_path, file_name=cv.filename)
                 db.add(cv_entry)
                 db.commit()
             
-            if "docx" in file_path:
-                file_path = file_path.replace("docx","pdf")
-                
-            results.append(CachedCV_Wrapper(hash_digest, file_path, False))
+        results.append(hash_digest)
     
     # return hash values for further usage
     return results
 
 
-def extract_cvs(cvs:list):
-    """Extract structured information from the documents using external API. Automatically skip already extracted documents.
-
-    :param cvs: list of documents to extract
-    :type cvs: list
-    """
-    
-    # filter for files that are not extracted
-    to_extract = [cv for cv in cvs if not cv.is_extracted()]
-    
-    # extract structured information from files
-    for cv in tqdm(to_extract):
+def extract_cv(file_path, hash):
+    # make API call to extract information and store response JSON
+    output_file = os.path.join(CV_OUTPUT_DIR, f"{os.path.splitext(hash)[0]}.json")
+    process_cv_php(file_path, output_file)
         
-        # make API call to extract information and store response JSON
-        output_file = os.path.join(CV_OUTPUT_DIR, f"{os.path.splitext(cv.get_hash_digest())[0]}_processed.json")
-        process_cv_php(cv.get_file_path(), output_file)
-        
-        # read response JSON from file, process it and store it in final destination
-        cv = read_json_file(output_file)
-        save_json(os.path.join(CV_OUTPUT_DIR_MATCHING, os.path.basename(output_file)), cv)
-        
-    
+    read_json_file(output_file)
 
 
 @app.post("/process")
@@ -186,12 +167,8 @@ async def process_matching(
     try:
         # compute provided CVs if present
         if input_cvs:
-            # store CVs in filesystem and calculate hash and insert into database
-            files_for_matching = await save_input_cvs(input_cvs)
-            print(files_for_matching)
-            
-            # extract CVs using API, and store json results
-            extract_cvs(files_for_matching)
+            # store and extract CVs in filesystem and calculate hash and insert into database
+            files_for_matching = await save_input_cvs(input_cvs)            
         else:
             print("No input cvs received")
         
@@ -200,9 +177,11 @@ async def process_matching(
         if all_cvs:
              # if the flag for all cvs is checked, use all CVs in database
             applicants = os.listdir(CV_OUTPUT_DIR_MATCHING)
+            # remove non-json files
+            applicants = [file.removesuffix(".json") for file in applicants if file.endswith('.json')]
         elif input_cvs: 
             # if cvs are provided, use only provided CVs
-            applicants = [applicant.get_extracted_path() for applicant in files_for_matching]
+            applicants = files_for_matching
         
         # if no CVs are provided and the all CVs flag is not checked, return errors
         if not all_cvs and not input_cvs:

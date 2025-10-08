@@ -5,6 +5,9 @@ from tqdm import tqdm
 from fastapi import UploadFile
 import tempfile
 
+import pytesseract
+from pdf2image import convert_from_path
+
 from src.config import PHP_SCRIPT_CV_EXTRACTION
 
 def process_cv_php(file_path:str, output_file:str):
@@ -23,12 +26,11 @@ def process_cv_php(file_path:str, output_file:str):
 def process_cvs_with_php(input_directory, output_directory, php_script_path):
     os.makedirs(output_directory, exist_ok=True)
     print("Starting CV extraction ...")
-    #convert_docx_to_pdf(input_directory)
 
     for filename in tqdm(os.listdir(input_directory)):
         if filename.lower().endswith('.pdf'):
             file_path = os.path.join(input_directory, filename)
-            output_file = os.path.join(output_directory, f"{os.path.splitext(filename)[0]}_processed.json")
+            output_file = os.path.join(output_directory, f"{os.path.splitext(filename)[0]}.json")
 
             try:
                 result = subprocess.run(
@@ -139,4 +141,16 @@ async def convert_docx_to_pdf(file:UploadFile, new_name:str, output_dir:str):
         if temp_input_file and os.path.exists(temp_input_file.name):
             
             # delete the temporary file
-            os.unlink(temp_input_file.name) 
+            os.unlink(temp_input_file.name)
+
+
+def convert_pdf_to_text(pdf_path):
+    pages = convert_from_path(pdf_path)
+
+    text_content = ""
+
+    for page in pages:
+        text = pytesseract.image_to_string(page, lang="deu+eng")
+        text_content += text + "\n"
+
+    return text_content

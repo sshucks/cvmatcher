@@ -4,6 +4,8 @@ import pprint
 from tqdm import tqdm
 import copy
 
+from src.config import CV_OUTPUT_DIR_MATCHING
+
 CV_STRUCTURE = {
     'personal_data': 
     {
@@ -108,11 +110,16 @@ def read_json_file(file_path:str):
     :return: extracted information of provided file
     :rtype: JSON
     """
-    with open(file_path, 'r') as f:
-        cv = copy.deepcopy(CV_STRUCTURE)
-        cv_data = json.load(f)['data']
-        cv = extract_data(cv_data, cv)
-    return cv
+    try:
+        with open(file_path, 'r') as f:
+            cv = copy.deepcopy(CV_STRUCTURE)
+            cv_data = json.load(f)['data']
+            cv = extract_data(cv_data, cv)
+            save_json(os.path.join(CV_OUTPUT_DIR_MATCHING, os.path.basename(file_path)), cv)
+
+    except Exception as e:
+        print(f"Error reading {file_path}: {e}")
+
 
 def save_json(file_path:str, data):
     """Store provided data and the specifed loction

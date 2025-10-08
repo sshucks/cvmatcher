@@ -127,7 +127,7 @@ def calculate_score(applicant_data, requirements_data,
                     position_name, skill_list, personal_skills_list, qualification_list, education_requirements, 
                     work_weight, skill_weight, personal_weight, education_weight):
     
-    json_file = open(applicant_data)    
+    json_file = open(applicant_data)
     cv_dict = json.load(json_file)
     json_file.close()
     work_list, work_description = extract_work(cv_dict)
@@ -188,11 +188,9 @@ def get_mail(file: str) -> str:
     :rtype: str
     """
 
-    file_pdf = file.replace("_processed.json", ".pdf")
-
     pdf_text = ""
 
-    with pymupdf.open(filename=file_pdf) as pdf:
+    with pymupdf.open(filename=file) as pdf:
         for page in pdf:
             pdf_text += page.get_text()
 
@@ -256,28 +254,33 @@ def match_applicant(file:UploadFile, work_weight:int, skill_weight:int, personal
     try:
         # calculate score for each applicant in selection
         # TODO: parallelize here
-        for i, applicant in enumerate(sorted(applicants)):
+        for i, applicant_hash in enumerate(sorted(applicants)):
                 
             try:
-                applicant_hash = str(applicant).split('_')[0]
+                # applicant_hash = str(applicant).split('_')[0]
                 with get_db() as db:
                     entry = db.query(CachedCVs).filter(CachedCVs.cv_hash==applicant_hash).first()
                     
                 # calculate score
-                score = calculate_score(os.path.join(CV_OUTPUT_DIR_MATCHING, applicant), requirements_data, 
+                score = calculate_score(os.path.join(CV_OUTPUT_DIR_MATCHING, applicant_hash + ".json"), requirements_data,
                                         position_name, skill_list, personal_skills_list, qualification_list, education_requirements,
                                         work_weight, skill_weight, personal_weight, education_weight)
-                email = get_mail(os.path.join(CV_INPUT_DIR, applicant))
+                email = get_mail(os.path.join(CV_INPUT_DIR, applicant_hash + ".pdf"))
                 score_dict[score["Name"]] = {"Score": score["Score"],
                                              "Birthdate": parse_custom_date(score["Birthdate"]),
                                              "Filename": entry.file_name,
-                                             "E-Mail": email} 
+                                             "E-Mail": email,
+                                             "Work Score": score["work_score"],
+                                             "Skill Score": score["skill_score"],
+                                             "Personal Score": score["personal_score"],
+                                             "Education Score": score["education_score"]}
+
                
             except Exception as e:
-                print(f"Calculation for {applicant} did not work because {e}")    
+                print(f"Calculation for {applicant_hash} did not work because {e}")    
 
         # combine results into dataframe and return top n scoring entries
-        result_df = pd.DataFrame.from_dict(score_dict, orient='index', columns=['Score', 'Birthdate', 'Filename', "E-Mail"]).reset_index()
+        result_df = pd.DataFrame.from_dict(score_dict, orient='index', columns=['Score', 'Birthdate', 'Filename', "E-Mail", "Work Score", "Skill Score", "Personal Score", "Education Score"]).reset_index()
 
         result_df.rename(columns={'index': 'Name'}, inplace=True)
         result_df = result_df.sort_values(by='Score', ascending=False).head(n)    
