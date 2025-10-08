@@ -49,7 +49,7 @@ class CachedCV_Wrapper:
         :return: file name of the JSON file containing the extracted information
         :rtype: str
         """
-        return f"{self.hash_digest}_processed.json"
+        return f"{self.hash_digest}.json"
     
     def __str__(self) -> str:
         return f"CachedCV_Wrapper[hash_digest={self.hash_digest}, file_path = {self.file_path}, is_extracted={self.already_extracted}]"
