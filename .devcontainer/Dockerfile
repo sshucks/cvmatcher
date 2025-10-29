@@ -13,8 +13,6 @@ RUN apt-get update && apt-get install -y \
     ca-certificates \
     tmux \
     libreoffice \
-    pytesseract \
-    poppler-utils \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -23,3 +21,4 @@ WORKDIR /workspaces/cvmatcher
 
 COPY .devcontainer/requirements.txt .
 RUN pip install --upgrade pip && pip install -r requirements.txt
+
