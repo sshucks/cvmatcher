@@ -13,3 +13,5 @@ DATABASE_FOLDER = "src/caching"
 DATABASE_FILE_NAME = "cv_caching.db"
 DATABASE_FILE_PATH = os.path.join(DATABASE_FOLDER, DATABASE_FILE_NAME)
 DATABASE_URL = f"sqlite:///{DATABASE_FILE_PATH}"
+
+ESCO_PATH = "resources/esco"
