@@ -21,12 +21,12 @@ class PreviousGroupMatching(MatchingStep):
             float: Matching score
         """
 
-        exp_weight = args.get("exp_weight")
-        pro_weight = args.get("pro_weight")
-        per_weight = args.get("per_weight")
-        edu_weight = args.get("edu_weight")
+        experience_weight = args.get("experience_weight")
+        professional_weight = args.get("professional_weight")
+        personal_weight = args.get("personal_weight")
+        education_weight = args.get("education_weight")
 
-        return match_applicant(cv_data, requirements, exp_weight, pro_weight, per_weight, edu_weight)
+        return match_applicant(cv_data, requirements, experience_weight, professional_weight, personal_weight, education_weight)
 
 class PreviousGroupRequirementsParsing(RequirementsParsingStep):
     def run(self, requirements_path: str, args) -> RequirementsData:
@@ -38,12 +38,6 @@ class PreviousGroupCVParsing(CVParsingStep):
         cv_data = read_json(cv_data)
         return cv_data
     
-args = {
-    "exp_weight": 1,
-    "pro_weight": 1,
-    "per_weight": 1,
-    "edu_weight": 1,
-}
 
 previous_group_pipeline = CVMatchingPipeline(
     RequirementsParsingStep=PreviousGroupRequirementsParsing(),
@@ -51,6 +45,6 @@ previous_group_pipeline = CVMatchingPipeline(
     MatchingStep=PreviousGroupMatching()
 )
 
-score = previous_group_pipeline.run("validation_data/11425/B-Stellenbeschreibung.docx", "validation_data/11425/ABS/B-14.pdf", args)
+# score = previous_group_pipeline.run("validation_data/11425/B-Stellenbeschreibung.docx", "validation_data/11425/ABS/B-14.pdf", args)
 
-print(f"Matching Score: {score}")
+# print(f"Matching Score: {score}")
