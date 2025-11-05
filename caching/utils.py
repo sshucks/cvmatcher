@@ -12,7 +12,7 @@ from caching.CachedCV_Wrapper import CachedCV_Wrapper
 from tqdm import tqdm
 from typing import List, Optional
 
-from utils import convert_docx_to_pdf
+from utils.utils import convert_docx_to_pdf
 
 def hash_in_database(hash:str) -> bool:
     """Check in database if CV hash already exists
