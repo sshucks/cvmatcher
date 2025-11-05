@@ -92,9 +92,14 @@ def save_cvs(cvs, dir):
         with open(filename, 'w') as json_file:
             json.dump(cv, json_file, indent=4)
 
-    
-def read_json(input_dir, output_dir):
-    print("Starting CV preprocessing ...")
-    cvs = read_jsons(input_dir)
-    save_cvs(cvs, output_dir)
-    print("CV preprocessing completed.")
+
+def read_json(cv_data:dict):
+    cv_data = cv_data['data']
+    cv = extract_data(cv_data, copy.deepcopy(CV_STRUCTURE))
+    return cv
+
+# def read_json(input_dir, output_dir):
+#     print("Starting CV preprocessing ...")
+#     cvs = read_jsons(input_dir)
+#     save_cvs(cvs, output_dir)
+#     print("CV preprocessing completed.")

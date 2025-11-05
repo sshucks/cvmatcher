@@ -5,12 +5,11 @@ import pandas as pd
 
 
 from matching.previous_group.match_requirements import Model
-# from parse_requirements.previous_group.extract_requirements import extract_requirement
 
 
 model = Model("google-bert/bert-base-german-cased")
 
-def remove_irelevant_matches(match_dict: dict):
+def remove_irrelevant_matches(match_dict: dict):
     for key in match_dict.keys():
         if match_dict[key]["Score"] < 0.8:
             match_dict.pop(key)
@@ -111,10 +110,9 @@ def calculate_total_score(work_score, work_weight,
     total_score = work_score * work_weight + skill_score * skill_weight + personal_score * personal_weight + education_score * education_weight
     return total_score
 
-def calculate_score(applicant_data, requirements_data, 
-                    position_name, skill_list, personal_skills_list, qualification_list, education_requirements, 
-                    work_weight, skill_weight, personal_weight, education_weight):
-
+def calculate_score(applicant_data, requirements_data, work_weight, skill_weight, personal_weight, education_weight):
+    position_name, skill_list, personal_skills_list, qualification_list, education_requirements = requirements_data
+    
     work_list, work_description = extract_work(applicant_data)
     profesional_skills, skill_level = extract_skills(applicant_data)
     education_list, education_institution = extract_education(applicant_data)
@@ -164,7 +162,7 @@ def calculate_score(applicant_data, requirements_data,
     
     return final_score
 
-def match_applicant(cv_data, requirements, work_weight, skill_weight, personal_weight, education_weight, n):
+def match_applicant(cv_data, requirements, work_weight, skill_weight, personal_weight, education_weight):
     total_weights = work_weight + skill_weight + personal_weight + education_weight
     work_weight = work_weight / total_weights
     skill_weight = skill_weight / total_weights

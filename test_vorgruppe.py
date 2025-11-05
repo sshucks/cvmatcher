@@ -3,6 +3,7 @@ from definitions import *
 from matching.previous_group.match_applicants import match_applicant
 from parse_requirements.previous_group.extract_requirements import extract_requirement
 from parse_cv.previous_group.process_cvs import process_cv
+from parse_cv.previous_group.read_json import read_json
 
 class PreviousGroupMatching(MatchingStep):
     
@@ -16,7 +17,6 @@ class PreviousGroupMatching(MatchingStep):
                 pro_weight: weight of professional skills
                 per_weight: weight of personal skills
                 edu_weight: weight of education
-                n: number of top applicants to return
         Returns:
             float: Matching score
         """
@@ -25,9 +25,8 @@ class PreviousGroupMatching(MatchingStep):
         pro_weight = args.get("pro_weight")
         per_weight = args.get("per_weight")
         edu_weight = args.get("edu_weight")
-        n = args.get("n")
 
-        return match_applicant(cv_data, requirements, exp_weight, pro_weight, per_weight, edu_weight, n)
+        return match_applicant(cv_data, requirements, exp_weight, pro_weight, per_weight, edu_weight)
 
 class PreviousGroupRequirementsParsing(RequirementsParsingStep):
     def run(self, requirements_path: str, args) -> RequirementsData:
@@ -35,14 +34,15 @@ class PreviousGroupRequirementsParsing(RequirementsParsingStep):
     
 class PreviousGroupCVParsing(CVParsingStep):
     def run(self, cv_path: str, args) -> CVData:
-        return process_cv(cv_path)
+        cv_data = process_cv(cv_path)
+        cv_data = read_json(cv_data)
+        return cv_data
     
 args = {
-    "exp_weight": 0.4,
-    "pro_weight": 0.3,
-    "per_weight": 0.2,
-    "edu_weight": 0.1,
-    "n": 5
+    "exp_weight": 1,
+    "pro_weight": 1,
+    "per_weight": 1,
+    "edu_weight": 1,
 }
 
 previous_group_pipeline = CVMatchingPipeline(
@@ -51,5 +51,6 @@ previous_group_pipeline = CVMatchingPipeline(
     MatchingStep=PreviousGroupMatching()
 )
 
+score = previous_group_pipeline.run("validation_data/11425/B-Stellenbeschreibung.docx", "validation_data/11425/ABS/B-14.pdf", args)
 
-previous_group_pipeline.run("validation_data/11425/B-Stellenbeschreibung.docx", "validation_data/11425/ABS/B-14.pdf", args)
+print(f"Matching Score: {score}")

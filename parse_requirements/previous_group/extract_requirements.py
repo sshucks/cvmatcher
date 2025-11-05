@@ -2,13 +2,12 @@ from docx2python import docx2python
 from tempfile import SpooledTemporaryFile
 import pprint
 
-
-relevant_headings = ["Erfolgskritische Faktoren für die Position",
-                     "Aufgaben",
-                     "Fachliche Qualifikationen und Kompetenzen",
-                     "Persönliche Anforderungen und Kompetenzen",
-                     "Persönliche Kompetenz"
-                    ]
+relevant_headings = {
+    "Faktoren" : ["Erfolgskritische Faktoren für die Position"],
+    "Aufgaben" : ["Aufgaben"],
+    "Qualifikationen" : ["Fachliche Qualifikationen und Kompetenzen", "Fachliche Anforderungen"],
+    "Persönlichkeit" : ["Persönliche Anforderungen und Kompetenzen", "Persönliche Kompetenz"]
+}
 
 other_headings = ["Ausgangssituation & wichtige Informationen zur Position",
                   "Umfeld der Position im Unternehmen",
@@ -18,41 +17,32 @@ other_headings = ["Ausgangssituation & wichtige Informationen zur Position",
                   "Sonstige Eckdaten",
                 ]
 
-qualification_parts = ["Fachliche Qualifikationen und Kompetenzen",
-                       "Formale Ausbildung",
-                       "Erfahrung",
-                       "Digitale Kompetenzen & firmeninterne Tools",
-                       "Sprachen",
-                       "Führerschein/eigener PKW als unbedingte Voraussetzung",
-                       "Reisebereitschaft (Radius, Ausmaß, national/international)",
-                       "Sonstiges",
-                       "EDV"
-                       ]
+qualification_sections = [
+    "Fachliche Qualifikationen und Kompetenzen",
+    "Formale Ausbildung",
+    "Erfahrung",
+    "Digitale Kompetenzen",
+    "Digitale Kompetenzen & firmeninterne Tools",
+    "Sprachen",
+    "Führerschein/eigener PKW als unbedingte Voraussetzung",
+    "Reisebereitschaft (Radius, Ausmaß, national/international)",
+    "Sonstiges",
+    "EDV",
+]
 
-
-def is_relevant_heading(text: str, heading: str):
-    if text == heading:
-        return True
-    return False
-
+def is_relevant_heading(text: str, headings: str):
+    return any(text in h for h in headings)
 
 def is_other_heading(text: str):
-    for h in other_headings:
-        if h == text:
-            return True
-    return False
-
+    return text in other_headings
 
 def is_qualification_heading(text: str):
-    for h in qualification_parts:
-        if h == text:
-            return True
-    return False
+    return text in qualification_sections
 
 
-def preprocess_text(file_path: str) -> list:
+def preprocess_text(file: str) -> list:
     text = ""
-    with docx2python(file_path) as docx_content:
+    with docx2python(file) as docx_content:
         text = docx_content.text
         docx_content.close()
     splitted_text = text.split("\n")
@@ -63,59 +53,38 @@ def preprocess_text(file_path: str) -> list:
 
 
 def extract_parts(text: list) -> tuple[str, str, str, str, str]:
-    factor_list = []
     position_name = text[1]
-    def _process_factors(text):
-        if len(text) <= 1:
-            factor_list.append("\n")
-        else:
-            factor_list.append(text + "\n")
-        
-    task_list = []
-    def _process_task(text):
-        if len(text) <= 1:
-            task_list.append("\n")
-        else:
-            task_list.append(text + "\n")
-                
-    qualifictaion_list = []
-    def _process_qualification(text):
-        if len(text) <= 1:
-            qualifictaion_list.append("\n")
-        else:
-            if is_qualification_heading(text):
-                qualifictaion_list.append(text + "\n")
+
+    sections = ["Faktoren", "Aufgaben", "Qualifikationen", "Persönlichkeit"]
+
+    section_lists = {section: [] for section in sections}
+
+    def process_line(section, line):
+        if section is None:
+            return
+        if len(line) <= 1:
+            section_lists[section].append("\n")
+        elif section == "Qualifikationen":
+            if is_qualification_heading(line):
+                section_lists[section].append(line + "\n")
             else:
-                qualifictaion_list.append("\t" + text + "\n")
+                section_lists[section].append("\t" + line + "\n")
+        else:
+            section_lists[section].append(line + "\n")
 
-    personality_list = []
-    def _process_personality(text):
-        if len(text) <= 1:
-            personality_list.append("\n")
-        else: 
-            personality_list.append(text + "\n")
-
-    process_func = lambda x: None
+    current_section = None
     for line in text:
-        if is_relevant_heading(line, relevant_headings[0]):
-            process_func = _process_factors
-        elif is_relevant_heading(line, relevant_headings[1]):
-            process_func = _process_task
-        elif is_relevant_heading(line, relevant_headings[2]):
-            process_func = _process_qualification
-        elif is_relevant_heading(line, relevant_headings[3]):
-            process_func = _process_personality
-        elif is_relevant_heading(line, relevant_headings[4]):
-            process_func = _process_personality
-        elif is_other_heading(line):
-            process_func = lambda x: None
-        process_func(line)
-
-        
-    factor_str = "".join(factor_list)
-    task_str = "".join(task_list)
-    qualification_str = "".join(qualifictaion_list)
-    personality_str = "".join(personality_list)
+        for section in sections:
+            if is_relevant_heading(line, relevant_headings[section]):
+                current_section = section
+            elif is_other_heading(line):
+                current_section = None
+        process_line(current_section, line)
+    
+    factor_str = "".join(section_lists["Faktoren"])
+    task_str = "".join(section_lists["Aufgaben"])
+    qualification_str = "".join(section_lists["Qualifikationen"])
+    personality_str = "".join(section_lists["Persönlichkeit"])
 
     return position_name, factor_str, task_str, qualification_str, personality_str
 
@@ -157,7 +126,7 @@ def extract_qualifications(skill_str: str):
     splitted = skill_str.split("\n")
     skill_results = []
     for i in range(len(splitted)):
-        if splitted[i] in relevant_parts:
+        if any(part in splitted[i] for part in relevant_parts):
             j = i + 1
             while j < len(splitted) and splitted[j].startswith("\t"):
                 skill_results.append(splitted[j].strip())
@@ -165,12 +134,12 @@ def extract_qualifications(skill_str: str):
 
     return skill_results
 
-def extract_eductaion(skill_str: str):
+def extract_education(skill_str: str):
     relevant_parts = ["Formale Ausbildung"]
     splitted = skill_str.split("\n")
     skill_results = []
     for i in range(len(splitted)):
-        if splitted[i] in relevant_parts:
+        if any(part in splitted[i] for part in relevant_parts):
             j = i + 1
             while j < len(splitted) and splitted[j].startswith("\t"):
                 skill_results.append(splitted[j].strip())
@@ -178,17 +147,17 @@ def extract_eductaion(skill_str: str):
 
     return skill_results
 
-def extract_requirement(file_path: str):
-    text = preprocess_text(file_path)
-    extracted = extract_parts(text)
+def extract_requirement(file: SpooledTemporaryFile):
+    text = preprocess_text(file)
+    position_name, factor_str, task_str, qualification_str, personality_str = extract_parts(text)
     skills_list = [] 
     personal_skills_list = []
     qualification_list = []
     education_list = []
-    skills_list.extend(extract_skills(extracted[1]))
-    skills_list.extend(extract_skills(extracted[2]))
-    personal_skills_list.extend(extract_personal_skills(extracted[4]))
-    qualification_list.extend(extract_qualifications(extracted[3]))
-    education_list.extend(extract_eductaion(extracted[3]))
-    return extracted[0], skills_list, personal_skills_list, qualification_list, education_list
-    
+    skills_list.extend(extract_skills(factor_str))
+    skills_list.extend(extract_skills(task_str))
+    personal_skills_list.extend(extract_personal_skills(personality_str))
+    qualification_list.extend(extract_qualifications(qualification_str))
+    education_list.extend(extract_education(qualification_str))
+
+    return position_name, skills_list, personal_skills_list, qualification_list, education_list

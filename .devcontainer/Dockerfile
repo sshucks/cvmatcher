@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y \
     ca-certificates \
     tmux \
     libreoffice \
-    tesseract-ocr \
+    # tesseract-ocr \
     # poppler-utils \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
