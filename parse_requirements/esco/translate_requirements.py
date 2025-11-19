@@ -1,9 +1,9 @@
 import utils.esco_utils as e
 import copy
-from definitions import PipelineStep, RequirementsData, ProfessionalExperienceData, EducationData
+from definitions import RequirementsData, ProfessionalExperienceData, EducationData
 from sentence_transformers import SentenceTransformer
 
-class ESCOTranslateRequirements(PipelineStep):
+class ESCOTranslateRequirements():
     """ Class to translate requirements to standardized ESCO terms """
     def run(self, requirements: RequirementsData, args) -> RequirementsData:
         #model = SentenceTransformer("TechWolf/JobBERT-v3")

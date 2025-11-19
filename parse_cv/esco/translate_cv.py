@@ -1,9 +1,9 @@
 import utils.esco_utils as e
 import copy
-from definitions import PipelineStep, CVData, ProfessionalExperienceData, EducationData
+from definitions import CVData, ProfessionalExperienceData, EducationData
 from sentence_transformers import SentenceTransformer
 
-class ESCOTranslateCV(PipelineStep):
+class ESCOTranslateCV():
     """ Class to translate requirements to standardized ESCO terms """
     def run(self, cv: CVData, args) -> CVData:
         #model = SentenceTransformer("TechWolf/JobBERT-v3")
