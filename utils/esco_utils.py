@@ -43,7 +43,7 @@ def ESCO_labelling(
     model: SentenceTransformer,
     threshold: float,
     max_terms: int,
-    embeddingsPath: str
+    embeddingsFile: str
 ) -> Set[str]:
     """ Function for labelling jobs or skills
 
@@ -57,7 +57,7 @@ def ESCO_labelling(
     :type threshold: float
     :param max_terms: max number of matches to keep per term
     :type max_terms: int
-    :param embeddingsPath: where to load the esco embeddings from (or calculate and save to, if not existing)
+    :param embeddingsFile: where to load the esco embeddings from (or calculate and save to, if not existing)
     :type embeddingsPath: str
 
     :return: Set of all matches ESCO URI
@@ -66,7 +66,7 @@ def ESCO_labelling(
 
     # gather embeddings
     esco_embeddings = None
-    
+    embeddingsPath = f"{ESCO_PATH}/{embeddingsFile}"
     if os.path.exists(embeddingsPath):
         esco_embeddings = np.load(embeddingsPath)
 
@@ -205,6 +205,24 @@ def read_occupation_hierarchy()->pd.DataFrame:
     return lookup
 
 
+def get_job_labels(uris:Set[str])->Set[str]:
+    """ Function to get the main labels for ESCO occupations
+
+    :param uris: ESCO occupations URI
+    :type terms: Set[str]
+
+    :return: Set of all ESCO labels
+    :rtype: Set[str]
+    """
+    esco_jobs = pd.read_csv(f"{ESCO_PATH}/occupations_de.csv")
+    isco_groups = pd.read_csv(f"{ESCO_PATH}/ISCOGroups_de.csv")
+
+    esco_isco = pd.concat([esco_jobs[["conceptUri","preferredLabel"]], isco_groups[["conceptUri","preferredLabel"]]])
+    selected = esco_isco[esco_isco['conceptUri'].isin(uris)]
+
+    return set(selected["preferredLabel"])
+
+
 def read_skills()->pd.DataFrame:
     """
     read skills and skill groups from ESCO folder
@@ -289,5 +307,21 @@ def get_skills_for_occ(terms:Set[str])->Set[str]:
 
     return skills
     
-    
+
+def get_skill_labels(uris:Set[str])->Set[str]:
+    """ Function to get the main labels for ESCO skills
+
+    :param uris: ESCO skills URI
+    :type terms: Set[str]
+    :param esco_path: path to ESCO folder
+    :type esco_path: str
+
+    :return: Set of all ESCO labels
+    :rtype: Set[str]
+    """
+    esco_skills = pd.read_csv(f"{ESCO_PATH}/skills_de.csv")
+
+    selected = esco_skills[esco_skills['conceptUri'].isin(uris)]
+
+    return set(selected["preferredLabel"])        
 
