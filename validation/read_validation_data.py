@@ -1,6 +1,6 @@
 import os
 import pandas as pd
-from src.config import VALIDATION_DATA_DIR
+from config import VALIDATION_DATA_DIR
 
 folder_map = {
         "ABS":  {"t1": 0, "t2": 0, "grat": 0},
@@ -38,6 +38,6 @@ for dir in os.listdir(VALIDATION_DATA_DIR):
                     **flags
                 })
 
-
 df = pd.DataFrame(entries)
-df.to_csv("validation_data.csv", index=False)
+
+df.to_csv("data/validation_data/validation_data.csv", index=False)
