@@ -5,28 +5,50 @@ from parse_requirements.previous_group.extract_requirements import extract_requi
 from parse_cv.previous_group.process_cvs import process_cv
 from parse_cv.previous_group.read_json import read_json
 
+
+# class PreviousGroupCategoryMatching(CategoryMatchingStep):
+#     def run(self, cv_data, requirements, args) -> float:
+#         score = match_applicant(cv_data, requirements)
+#         return score
+
+# class PreviousGroupMatchingCategories(MatchingStepCategories):
+    
+#     category_args = {
+#         "education": {
+#             "weight": 1.0,
+#             "method": PreviousGroupCategoryMatching(),
+#         },
+#         "professional_experience": {
+#             "weight": 1.0,
+#             "method": PreviousGroupCategoryMatching(),
+#         },
+#         "hard_skills": {
+#             "weight": 1.0,
+#             "method": PreviousGroupCategoryMatching(),
+#         },
+#         "soft_skills": {
+#             "weight": 1.0,
+#             "method": PreviousGroupCategoryMatching(),
+#         },
+#     }
+    
 class PreviousGroupMatching(MatchingStep):
     
+    weights = {
+        "education_weight": 1.0,
+        "professional_experience_weight": 1.0,
+        "hard_skills_weight": 1.0,
+        "soft_skills_weight": 1.0,
+    }
+    
     def run(self, cv_data: CVData, requirements: RequirementsData, args) -> float:
-        """Implement matching logic here
-        Args:
-            cv_data (CVData): Parsed CV data
-            requirements (RequirementsData): Parsed requirements data
-            args (dict): Additional arguments for matching
-                exp_weight: weight of working experience
-                pro_weight: weight of professional skills
-                per_weight: weight of personal skills
-                edu_weight: weight of education
-        Returns:
-            float: Matching score
-        """
-
-        experience_weight = args.get("experience_weight")
-        professional_weight = args.get("professional_weight")
-        personal_weight = args.get("personal_weight")
-        education_weight = args.get("education_weight")
-
-        return match_applicant(cv_data, requirements, experience_weight, professional_weight, personal_weight, education_weight)
+        score = match_applicant(cv_data, requirements, 
+                                self.weights["professional_experience_weight"],
+                                self.weights["hard_skills_weight"],
+                                self.weights["soft_skills_weight"],
+                                self.weights["education_weight"])
+        return score
+    
 
 class PreviousGroupRequirementsParsing(RequirementsParsingStep):
     def run(self, requirements_path: str, args) -> RequirementsData:
