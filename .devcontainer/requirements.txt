@@ -16,3 +16,4 @@ huggingface_hub[hf_xet]
 sqlalchemy
 pytesseract
 pdf2image
+sentence-transformers
