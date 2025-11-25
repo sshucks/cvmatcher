@@ -1,0 +1,114 @@
+{
+  "type": "object",
+  "title": "ComprehensiveResumeData",
+  "properties": {
+    
+    "personal": {
+      "type": "object",
+      "description": "Personal contact and identifying information.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The full name of the individual."
+        },
+        "mail": {
+          "type": "string",
+          "format": "email",
+          "description": "The primary email address."
+        },
+        "phone": {
+          "type": "string",
+          "description": "The primary phone number."
+        },
+        "date_of_birth": {
+          "type": "string",
+          "format": "date",
+          "description": "The individual's date of birth (e.g., YYYY-MM-DD)."
+        }
+      },
+      "required": ["name", "mail", "phone"]
+    },
+    
+    "hard_skills": {
+      "type": "array",
+      "description": "A list of technical or measurable abilities.",
+      "items": {
+        "type": "string"
+      }
+    },
+    
+    "soft_skills": {
+      "type": "array",
+      "description": "A list of personal attributes or interpersonal abilities.",
+      "items": {
+        "type": "string"
+      }
+    },
+    
+    "education": {
+      "type": "array",
+      "description": "A list of educational history entries.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "field_of_study": {
+            "type": "string",
+            "description": "The major or field of study."
+          },
+          "graduated": {
+            "type": "boolean",
+            "description": "Whether the degree program was completed."
+          },
+          "degree": {
+            "type": "string",
+            "description": "The level of the degree obtained."
+          }
+        },
+        "required": ["field_of_study", "graduated", "degree"]
+      }
+    },
+    
+    "professional_experience": {
+      "type": "array",
+      "description": "A list of professional experience entries.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "start": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The starting date of the employment (e.g., YYYY-MM-DD)."
+          },
+          "end": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The ending date of the employment, or null if current (e.g., YYYY-MM-DD)."
+          },
+          "industry": {
+            "type": "string",
+            "description": "The industry of the employer."
+          },
+          "job_title": {
+            "type": "string",
+            "description": "The title held during the employment."
+          },
+          "responsibilities": {
+            "type": "array",
+            "description": "A list of key duties or accomplishments.",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["start", "industry", "job_title", "responsibilities", "end"]
+      }
+    }
+  },
+  "required": [
+    "personal", 
+    "hard_skills", 
+    "soft_skills", 
+    "education", 
+    "professional_experience"
+  ]
+}

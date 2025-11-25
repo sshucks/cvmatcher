@@ -1,0 +1,78 @@
+{
+  "type": "object",
+  "title": "ResumeData",
+  "properties": {
+
+    "hard_skills": {
+      "type": "array",
+      "description": "A list of technical or measurable abilities.",
+      "items": {
+        "type": "string"
+      }
+    },
+
+    "soft_skills": {
+      "type": "array",
+      "description": "A list of personal attributes or interpersonal abilities.",
+      "items": {
+        "type": "string"
+      }
+    },
+
+    "education": {
+      "type": "array",
+      "description": "A list of educational entries.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "field_of_study": {
+            "type": "string",
+            "description": "The major or field of study (e.g., Computer Science)."
+          },
+          "degree": {
+            "type": "string",
+            "description": "The level of the degree obtained (e.g., Bachelor's, Master's)."
+          }
+        },
+        "required": ["field_of_study", "degree"]
+      }
+    },
+
+    "job_title": {
+      "type": "array",
+      "description": "A list of desired or current job titles.",
+      "items": {
+        "type": "string"
+      }
+    },
+
+    "professional_experience": {
+      "type": "array",
+      "description": "A list of professional experience entries.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "duration": {
+            "type": "string",
+            "description": "The length of the employment or start/end dates."
+          },
+          "industry": {
+            "type": "string",
+            "description": "The industry of the employer."
+          },
+          "job_title": {
+            "type": "string",
+            "description": "The title held during the employment."
+          }
+        },
+        "required": ["duration", "industry", "job_title"]
+      }
+    }
+  },
+  "required": [
+    "hard_skills",
+    "soft_skills",
+    "education",
+    "professional_experience"
+  ]
+}
