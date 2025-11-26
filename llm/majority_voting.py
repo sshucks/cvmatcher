@@ -142,7 +142,7 @@ class ObjectMajoritVotingStrategy(MajorityVotingFieldStrategy):
             if len(value_to_select) == 1:
                 results[key] = list(value_to_select)[0]
             else:
-                raise ValueError
+                raise ValueError(f"multiple values to select for data[{self.key}][{key}]")
 
         return results
 
