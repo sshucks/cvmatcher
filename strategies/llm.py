@@ -1,4 +1,7 @@
+from typing import TypedDict
+
 import utils, os, json
+from caching.CachingMixin import CachingMixin
 from config import LLM_SYSTEM_PROMPT_PATH_REQUIREMENTS_PARSING_DE, LLM_PARSED_REQUIREMENTS_SCHEMA, LLM_SYSTEM_PROMPT_PATH_CV_PARSING_DE, LLM_PARSED_CV_SCHEMA
 from definitions import RequirementsParsingStep, RequirementsData, CVParsingStep, CVData
 from llm.majority_voting import MajorityVoting, ObjectMajoritVotingStrategy
@@ -79,7 +82,7 @@ class LLMRequirementsParsingStep(RequirementsParsingStep):
         except ValueError as e:
             print(f"An error occured: {repr(e)}")
 
-class LLMCVParsingStep(CVParsingStep):
+class LLMCVParsingStep(CVParsingStep, CachingMixin):
     
     def run(self, cv_path: str, args) -> CVData:
         """
@@ -133,7 +136,13 @@ class LLMCVParsingStep(CVParsingStep):
                 response.write(json.dumps(aggregated_result, indent=4, sort_keys=True, ensure_ascii=False))
 
             # return result
+            self.write_cache_to_database(aggregated_result)
             return aggregated_result
         
         except ValueError as e:
             print(f"An error occured: {repr(e)}")
+
+    def write_cache_to_database(self, data:dict):
+        print("Writing to database")
+
+

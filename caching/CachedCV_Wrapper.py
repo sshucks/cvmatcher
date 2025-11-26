@@ -1,5 +1,5 @@
 import os
-from src.config import CV_OUTPUT_DIR_MATCHING
+from config import CV_OUTPUT_DIR_MATCHING
 
 class CachedCV_Wrapper:
     """Representation of a cached CV
