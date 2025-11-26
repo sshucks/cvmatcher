@@ -31,6 +31,7 @@ def init_db():
     Call this function once when your application starts for the first time
     or when you want to recreate the database schema (e.g., in tests).
     """
+    print(DATABASE_URL)
     Base.metadata.create_all(bind=engine)
     print(f"Database initialized at: {DATABASE_URL}")
     
