@@ -53,7 +53,7 @@
         "type": "object",
         "properties": {
           "duration": {
-            "type": "string",
+            "type": "integer",
             "description": "The length of the employment or start/end dates."
           },
           "industry": {
