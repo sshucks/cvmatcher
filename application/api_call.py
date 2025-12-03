@@ -1,16 +1,14 @@
 import pandas as pd
 from fastapi import FastAPI, UploadFile, Form, File, status
-from typing import List
 from fastapi.responses import JSONResponse
-import sys
 import os
-from typing import List
+import tempfile, shutil
 
-from tqdm import tqdm
 from typing import List, Optional
-from config import CV_OUTPUT_DIR_MATCHING, CV_OUTPUT_DIR
+from config import CV_OUTPUT_DIR
 from caching.utils import save_input_cvs
-# from pipeline.basic_pipeline import pipeline
+from pipeline import pipeline_llm_parsing_previous_matching as pipeline
+from config import DEFAULT_MATCHING_CONFIG
 
 app = FastAPI()
 
@@ -63,7 +61,7 @@ async def process_matching(
     try:
         # compute provided CVs if present
         if input_cvs:
-            # store and extract CVs in filesystem and calculate hash and insert into database
+            # store CVs in filesystem, calculate hash and insert into database
             files_for_matching = await save_input_cvs(input_cvs)
             print(files_for_matching)
         else:
@@ -71,17 +69,21 @@ async def process_matching(
 
         
         # determine the applicants to score
-        applicants = None
+        applicants = {}
         if all_cvs:
              # if the flag for all cvs is checked, use all CVs in database
-            applicants = os.listdir(CV_OUTPUT_DIR_MATCHING)
-            # remove non-json files
-            applicants = [file.removesuffix(".pdf") for file in applicants if file.endswith('.pdf')]
+            applicants["parsed"] = os.listdir(CV_OUTPUT_DIR)
+            hashes_parsed = [ os.path.basename(f).split(".")[0] for f in applicants["parsed"]]
+            print("hashes_parsed", hashes_parsed)
+            applicants["raw"] = [file for file in files_for_matching if os.path.basename(file).split(".")[0] not in hashes_parsed]
+            
         elif input_cvs:
             # if cvs are provided, use only provided CVs
-            applicants = files_for_matching
+            applicants["parsed"] = [file for file in files_for_matching if os.path.basename(file).split(".")[-1] == "json"]
+            hashes_parsed = [ os.path.basename(f).split(".")[0] for f in os.listdir(CV_OUTPUT_DIR)]
+            print("hashes_parsed", hashes_parsed)
+            applicants["raw"] = [file for file in files_for_matching if os.path.basename(file).split(".")[0] not in hashes_parsed]
 
-        print(applicants)
         # if no CVs are provided and the all CVs flag is not checked, return errors
         if not all_cvs and not input_cvs:
             return JSONResponse(
@@ -91,8 +93,28 @@ async def process_matching(
                     "error": "Neither a list of CVs was provided nor the option to use all CVs in the database was checked. Please provide some CVs or check the option to use all CVs in the database."
                 }
             )
+
+        # define the weights used for matching based on the user input
+        weighted_config = DEFAULT_MATCHING_CONFIG.copy()
+        weighted_config["education"]["weight"] = edu_weight
+        weighted_config["professional_experience"]["weight"] = exp_weight
+        weighted_config["hard_skills"]["weight"] = pro_weight
+        weighted_config["soft_skills"]["weight"] = per_weight
+
+        # generate a temporary file of the requirements file so it can be read/processed in the pipeline
+        suffix = os.path.splitext(requirements.filename)[1]
+        with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
+            shutil.copyfileobj(requirements.file, tmp)
+            tmp_path = tmp.name
+        
+        
         # Call the matching logic
-        results_df, warnings = (pd.DataFrame({'applicants':applicants}), []) #call_matching(requirements, edu_weight, exp_weight, pro_weight, per_weight, n, applicants)
+        print("running pipeline")
+        results_df, warnings = pipeline.run_multiple_cvs(requirement_path= tmp_path, 
+                                                         cv_paths=applicants, 
+                                                         args=weighted_config )
+        
+        #(pd.DataFrame({'applicants':applicants}), []) #call_matching(requirements, edu_weight, exp_weight, pro_weight, per_weight, n, applicants)
 
         if results_df is None:
             return JSONResponse(content={"error": "Error while extracting requirements! Check structure of requirements file and try again.", "warnings": warnings}, status_code=500)
@@ -106,3 +128,7 @@ async def process_matching(
     except Exception as e:
         print(repr(e))
         return JSONResponse(content={"error": str(e)}, status_code=500)
+    finally:
+        # delete the temporary requirements file that was created
+        if 'tmp_path' in locals() and os.path.exists(tmp_path):
+            os.unlink(tmp_path)

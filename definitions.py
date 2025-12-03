@@ -1,7 +1,9 @@
 from abc import ABC, abstractmethod
-from typing import TypedDict, cast
+from typing import TypedDict, cast, List, Dict
 import datetime
 import warnings
+import os
+import json
 
 class EducationData(TypedDict):
     """
@@ -314,16 +316,22 @@ class CVMatchingPipeline:
         score = None
         scores = {}
         requirements = self.RequirementsParsingStep.run(requirement_path, args=args)
-
-        # Loop through each CV path and process
-        for cv_path in cv_paths:
-
+        cv_paths_more = [(item, key) for key, values in cv_paths.items() for item in values]
+        print("Processing CVs for requirement:", requirement_path)
+        for cv_path in cv_paths_more:
             print("Processing CV:", cv_path)
+            
+            try: 
+                if cv_path[1] == "raw":
+                    print("parsing cv")
+                    cv_data = self.CVParsingStep.run(cv_path[0], args=args)
+                elif cv_path[1] == "parsed":
+                    print("reading already parsed cv from file system")
+                    with open(cv_path[0]) as parsed_cv:
+                        cv_data = json.loads(parsed_cv)
 
-            try:
-                cv_data = self.CVParsingStep.run(cv_path, args=args)
-                score, scores = self.MatchingStep.run(cv_data, requirements, args=args)
-
+                score = 0#self.MatchingStep.run(cv_data, requirements, args=args)
+            
                 results.append({
                     "cv_path": cv_path,
                     "score": score,
@@ -331,7 +339,7 @@ class CVMatchingPipeline:
                 })
                 
             except Exception as e:
-                print(f"Error processing CV {cv_path}: {e}")
+                print(f"Error processing CV {cv_path}: {repr(e)}")
                 results.append({
                     "cv_path": cv_path,
                     "score": score,

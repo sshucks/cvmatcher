@@ -1,31 +1,18 @@
 from typing import TypedDict
 
 import utils, os, json
-from caching.CachingMixin import CachingMixin
-from config import LLM_SYSTEM_PROMPT_PATH_REQUIREMENTS_PARSING_DE, LLM_PARSED_REQUIREMENTS_SCHEMA, LLM_SYSTEM_PROMPT_PATH_CV_PARSING_DE, LLM_PARSED_CV_SCHEMA
+from caching.CachingMixin import PersistingMixin
+from config import (LLM_SYSTEM_PROMPT_PATH_REQUIREMENTS_PARSING_DE, 
+                    LLM_PARSED_REQUIREMENTS_SCHEMA, 
+                    LLM_SYSTEM_PROMPT_PATH_CV_PARSING_DE, 
+                    LLM_PARSED_CV_SCHEMA, CV_OUTPUT_DIR)
+
 from definitions import RequirementsParsingStep, RequirementsData, CVParsingStep, CVData
 from llm.majority_voting import MajorityVoting, ObjectMajoritVotingStrategy
 from parse_requirements.llm import extract_requirements as parse_requirements
 from parse_cv.llm import extract_cv as parse_cv
 from llm import ListIntersectionMajorityVotingStrategy, ListObjectMajorityVotingStrategy, \
     SingleValueMajorityVotingStrategy
-
-def get_info_from_file_path(full_path:str):
-    print(f"File found: {full_path}")
-    # 1. Get the path to the parent directory: /home/user/documents/reports/data
-    parent_dir_path = os.path.dirname(full_path)
-
-    # 2. Get the path to the grandparent directory: /home/user/documents/reports
-    grandparent_dir_path = os.path.dirname(parent_dir_path)
-
-    # 3. Extract the name of the grandparent folder
-    project_folder = os.path.basename(grandparent_dir_path)
-
-    # Extract the parent folder and filename as before
-    classification_folder = os.path.basename(parent_dir_path)
-    filename = os.path.basename(full_path)
-
-    return (project_folder, classification_folder, filename)
 
 class LLMRequirementsParsingStep(RequirementsParsingStep):
     def run(self, requirements_path: str, args) -> RequirementsData:
@@ -68,21 +55,12 @@ class LLMRequirementsParsingStep(RequirementsParsingStep):
             m_voting.set_strategies(mapping=mapping)
             aggregated_result = m_voting.apply_voting(intermediate_results)
 
-            project_folder, classification_folder,filename = get_info_from_file_path(requirements_path)
-
-            path = os.path.join(".","data", "agg", "agg_requirements", project_folder, classification_folder)
-            os.makedirs(path, exist_ok=True)
-            path = os.path.join(path, filename+".json")
-
-            with open(path, "w", encoding='utf-8') as response:
-                response.write(json.dumps(aggregated_result, indent=4, sort_keys=True, ensure_ascii=False))
-
             # return results
             return aggregated_result
         except ValueError as e:
             print(f"An error occured: {repr(e)}")
 
-class LLMCVParsingStep(CVParsingStep, CachingMixin):
+class LLMCVParsingStep(CVParsingStep, PersistingMixin):
     
     def run(self, cv_path: str, args) -> CVData:
         """
@@ -126,23 +104,21 @@ class LLMCVParsingStep(CVParsingStep, CachingMixin):
             m_voting.set_strategies(mapping=mapping)
             aggregated_result = m_voting.apply_voting(intermediate_results)
 
-            project_folder, classification_folder,filename = get_info_from_file_path(cv_path)
+            # persist the aggreagted data
+            filename = os.path.basename(cv_path)
+            self.persist_data(filename=filename, dest=CV_OUTPUT_DIR, data=aggregated_result)
 
-            path = os.path.join(".","data", "agg", "agg_cv", project_folder, classification_folder)
-            os.makedirs(path, exist_ok=True)
-            path = os.path.join(path, filename+".json")
-
-            with open(path, "w", encoding='utf-8') as response:
-                response.write(json.dumps(aggregated_result, indent=4, sort_keys=True, ensure_ascii=False))
-
-            # return result
-            self.write_cache_to_database(aggregated_result)
             return aggregated_result
         
         except ValueError as e:
             print(f"An error occured: {repr(e)}")
 
-    def write_cache_to_database(self, data:dict):
-        print("Writing to database")
+    def persist_data(self, filename:str, dest:str, data:dict):
+        
+        os.makedirs(dest, exist_ok=True)
+        path = os.path.join(dest, filename+".json")
+
+        with open(path, "w", encoding='utf-8') as response:
+            response.write(json.dumps(data, indent=4, sort_keys=True, ensure_ascii=False))
 
 
