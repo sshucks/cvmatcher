@@ -126,46 +126,6 @@ def enrich_ESCO(terms:Set[str], lookup:pd.DataFrame)->Set[str]:
     return terms | new_terms
 
 
-# def hierarchical_matching(requirements:Set[str], cv_labels:Set[str], lookup:pd.DataFrame, hierarchical_decay:float):
-#     """ Function to match requirements and cv_labels
-
-#     :param requirements: ESCO labels of requirements
-#     :type requirements: Set[str]
-#     :param cv_labels: ESCO labels of CV
-#     :type cv_labels: Set[str]
-#     :param lookup: relations table, columns: child, parent
-#     :type lookup: pd.DataFrame
-#     :param hierarchical_decay: Hyperparameter to model the score values of broader hierarchical matches
-#     :type hierarchical_decay: float
-
-#     :return: Value 0-1, how well are the requirements covered in the cv
-#     :rtype: float
-#     """
-#     enriched_labels = enrich_ESCO(cv_labels, lookup)
-
-#     matches = []
-#     score = 0
-
-#     for r in requirements:
-#         done = False
-#         weight = 1
-#         term = r
-        
-#         while not done:
-#             if term in enriched_labels:
-#                 score += weight
-#                 done = True
-#                 matches.append(term)
-#             else:
-#                 weight = weight * hierarchical_decay
-#                 if term in lookup['child'].values:
-#                     term = lookup[lookup['child'] == term].iloc[0]["parent"]
-#                 else:
-#                     done = True
-    
-#     return(score/len(requirements), matches)
-
-
 def read_occupations(language:str)->pd.DataFrame:
     """
     read occupations and occupation groups from ESCO folder
