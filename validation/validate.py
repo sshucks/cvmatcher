@@ -1,10 +1,12 @@
 from typing import Callable
 import pandas as pd
-
 from definitions import RequirementsParsingStep, CVParsingStep, MatchingStep, CVMatchingPipeline
 from parse_cv.read_llm_parsed_cv import ReadLLMParsedCV
 from parse_requirements.read_llm_parsed_requirement import ReadLLMParsedRequirement
 from strategies.previous_group import PreviousGroupRequirementsParsing, PreviousGroupCVParsing, PreviousGroupMatching
+#from strategies.jobbert import JobBERTMatchingCategories
+
+
 applicants = pd.read_csv("data/validation_data/validation_data.csv")
 applicants_grouped = applicants.groupby('requirements_path')
 
