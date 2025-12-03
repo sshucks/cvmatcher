@@ -13,11 +13,14 @@ entries = []
 
 for dir in os.listdir(VALIDATION_DATA_DIR):
 
-    dir_path = os.path.join(VALIDATION_DATA_DIR, dir)
+    dir_path = os.path.join(VALIDATION_DATA_DIR, dir, "parsed_data")
+
+    if not os.path.exists(dir_path):
+        continue
 
     requirements = next(
-    (os.path.join(dir_path, f) for f in os.listdir(dir_path) if f.endswith(".docx")),
-    None
+        (os.path.join(dir_path, f) for f in os.listdir(dir_path) if f.endswith(".json")),
+        None
     )
 
     if requirements is None:
@@ -31,7 +34,7 @@ for dir in os.listdir(VALIDATION_DATA_DIR):
             continue
 
         for file in os.listdir(folder_path):
-            if file.endswith(".pdf"):
+            if file.endswith(".json"):
                 entries.append({
                     "requirements_path": requirements,
                     "cv_path": os.path.join(folder_path, file),
@@ -41,3 +44,4 @@ for dir in os.listdir(VALIDATION_DATA_DIR):
 df = pd.DataFrame(entries)
 
 df.to_csv("data/validation_data/validation_data.csv", index=False)
+print("File saved")
