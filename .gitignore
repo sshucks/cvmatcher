@@ -12,6 +12,7 @@ __pycache__/
 
 **/validation_data/*
 !validation_data/.gitkeep
+!validation_data/validation_data.csv
 
 *.db
 
