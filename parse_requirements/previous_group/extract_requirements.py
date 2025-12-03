@@ -147,7 +147,7 @@ def extract_education(skill_str: str):
 
     return skill_results
 
-def extract_requirement(file: SpooledTemporaryFile):
+def extract_requirement(file):
     text = preprocess_text(file)
     position_name, factor_str, task_str, qualification_str, personality_str = extract_parts(text)
     skills_list = [] 

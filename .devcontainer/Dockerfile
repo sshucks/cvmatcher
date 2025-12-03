@@ -23,3 +23,4 @@ WORKDIR /workspaces/cvmatcher
 
 COPY .devcontainer/requirements.txt .
 RUN pip install --upgrade pip && pip install -r requirements.txt
+
