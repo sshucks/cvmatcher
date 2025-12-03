@@ -3,6 +3,8 @@ from abc import ABC, abstractmethod
 from typing import TypedDict, cast
 import datetime
 
+import pandas as pd
+
 class EducationData(TypedDict):
     degree: str
     field_of_study: str
@@ -120,12 +122,27 @@ class CVMatchingPipeline:
     def run_single_cv(self, requirements_path, cv_path, args):
         requirements = self.RequirementsParsingStep.run(requirements_path, args)
         cv_data = self.CVParsingStep.run(cv_path, args)
-        score = self.MatchingStep.run(cv_data, requirements, args)
-        return score
+
+        score = None
+        scores = {}
+
+        try:
+            score, scores = self.MatchingStep.run(cv_data, requirements, args)
+        except Exception as e:
+            pass
+
+        final_scores = {
+            "score": score,
+            **scores
+        }
+
+        return final_scores
     
     def run_multiple_cvs(self, requirement_path, cv_paths, args=None):
         print("Processing CVs for requirement:", requirement_path)
         results = []
+        score = None
+        scores = {}
         requirements = self.RequirementsParsingStep.run(requirement_path, args=args)
 
         for cv_path in cv_paths:
@@ -134,17 +151,19 @@ class CVMatchingPipeline:
             
             try: 
                 cv_data = self.CVParsingStep.run(cv_path, args=args)
-                score = self.MatchingStep.run(cv_data, requirements, args=args)
-            
+                score, scores = self.MatchingStep.run(cv_data, requirements, args=args)
+
                 results.append({
                     "cv_path": cv_path,
-                    "score": score
+                    "score": score,
+                    **scores
                 })
             except Exception as e:
                 print(f"Error processing CV {cv_path}: {e}")
                 results.append({
                     "cv_path": cv_path,
-                    "score": None
+                    "score": score,
+                    **scores
                 })
 
         return results
