@@ -5,32 +5,6 @@ from parse_requirements.previous_group.extract_requirements import extract_requi
 from parse_cv.previous_group.process_cvs import process_cv
 from parse_cv.previous_group.read_json import read_json
 
-
-# class PreviousGroupCategoryMatching(CategoryMatchingStep):
-#     def run(self, cv_data, requirements, args) -> float:
-#         score = match_applicant(cv_data, requirements)
-#         return score
-
-# class PreviousGroupMatchingCategories(MatchingStepCategories):
-    
-#     category_args = {
-#         "education": {
-#             "weight": 1.0,
-#             "method": PreviousGroupCategoryMatching(),
-#         },
-#         "professional_experience": {
-#             "weight": 1.0,
-#             "method": PreviousGroupCategoryMatching(),
-#         },
-#         "hard_skills": {
-#             "weight": 1.0,
-#             "method": PreviousGroupCategoryMatching(),
-#         },
-#         "soft_skills": {
-#             "weight": 1.0,
-#             "method": PreviousGroupCategoryMatching(),
-#         },
-#     }
     
 class PreviousGroupMatching(MatchingStep):
     
@@ -66,7 +40,3 @@ previous_group_pipeline = CVMatchingPipeline(
     CVParsingStep=PreviousGroupCVParsing(),
     MatchingStep=PreviousGroupMatching()
 )
-
-# score = previous_group_pipeline.run("validation_data/11425/B-Stellenbeschreibung.docx", "validation_data/11425/ABS/B-14.pdf", args)
-
-# print(f"Matching Score: {score}")
