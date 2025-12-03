@@ -112,23 +112,22 @@ async def save_input_cvs(input_cvs:List[UploadFile]) -> list:
         if file_exists:
             # TODO: implement logging
              # add file to results
-            cv = CachedCV_Wrapper(hash_digest, file_path, True)
+            #cv = CachedCV_Wrapper(hash_digest, file_path, True)
             print(f"{hash_digest} already exists, SKIPPING")
+            file_path = os.path.join(CV_OUTPUT_DIR, f"{hash_digest}.json")
         else:
             await store_cv(hash=hash_digest, file_name=file_name, output_dir=CV_INPUT_DIR, file=cv)
             
             if "docx" in file_path:
                 file_path = file_path.replace("docx","pdf")
 
-            # extract_cv(file_path, hash_digest)
-            #
-            # write extracted CV to database
+            # write file path (hash) of CV to database
             with get_db() as db:
                 cv_entry = CachedCVs(cv_hash=hash_digest, path=file_path, file_name=cv.filename)
                 db.add(cv_entry)
                 db.commit()
             
-        results.append(hash_digest)
+        results.append(file_path)
     
     # return hash values for further usage
     return results

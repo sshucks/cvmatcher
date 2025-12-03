@@ -1,6 +1,6 @@
 from typing import TypedDict
 
 
-class CachingMixin:
-    def write_cache_to_database(self, data:dict):
+class PersistingMixin:
+    def persist_data(self,filename:str, dest:str, data:dict):
         pass
