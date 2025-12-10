@@ -1,5 +1,5 @@
 import os
-from definitions import CategoryMatchingStep
+from definitions import MatchingStep
 
 # PHP_SCRIPT_CV_EXTRACTION = "./src/extracting/cv/curlRequest.php"
 
@@ -33,10 +33,10 @@ LLM_MAJORITY_M = 2
 LLM_MAJORITY_N = 3
 
 # ------ MATCHING ------
-DEFAULT_EDUCATION_MATCHING = CategoryMatchingStep()
-DEFAULT_PROF_EXPIERENCE_MATCHING = CategoryMatchingStep()
-DEFAULT_HARD_SKILLS_MATCHING = CategoryMatchingStep()
-DEFAULT_SOFT_SKILL_MATCHING = CategoryMatchingStep()
+DEFAULT_EDUCATION_MATCHING = MatchingStep()
+DEFAULT_PROF_EXPIERENCE_MATCHING = MatchingStep()
+DEFAULT_HARD_SKILLS_MATCHING = MatchingStep()
+DEFAULT_SOFT_SKILL_MATCHING = MatchingStep()
 
 DEFAULT_MATCHING_CONFIG  = {
              "education" : {
