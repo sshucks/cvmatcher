@@ -13,13 +13,13 @@ entries = []
 
 for dir in os.listdir(VALIDATION_DATA_DIR):
 
-    dir_path = os.path.join(VALIDATION_DATA_DIR, dir, "parsed_data")
+    dir_path = os.path.join(VALIDATION_DATA_DIR, dir, "raw_data")
 
     if not os.path.exists(dir_path):
         continue
 
     requirements = next(
-        (os.path.join(dir_path, f) for f in os.listdir(dir_path) if f.endswith(".json")),
+        (os.path.join(dir_path, f) for f in os.listdir(dir_path) if f.endswith(".docx")),
         None
     )
 
@@ -34,7 +34,7 @@ for dir in os.listdir(VALIDATION_DATA_DIR):
             continue
 
         for file in os.listdir(folder_path):
-            if file.endswith(".json"):
+            if file.endswith(".pdf"):
                 entries.append({
                     "requirements_path": requirements,
                     "cv_path": os.path.join(folder_path, file),

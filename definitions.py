@@ -321,21 +321,21 @@ class CVMatchingPipeline:
 
             print("Processing CV:", cv_path)
 
-            # try:
-            cv_data = self.CVParsingStep.run(cv_path, args=args)
-            score, scores = self.MatchingStep.run(cv_data, requirements, args=args)
+            try:
+                cv_data = self.CVParsingStep.run(cv_path, args=args)
+                score, scores = self.MatchingStep.run(cv_data, requirements, args=args)
 
-            results.append({
-                "cv_path": cv_path,
-                "score": score,
-                **scores
-            })
-            # except Exception as e:
-            #     print(f"Error processing CV {cv_path}: {e}")
-            #     results.append({
-            #         "cv_path": cv_path,
-            #         "score": score,
-            #         **scores
-            #     })
+                results.append({
+                    "cv_path": cv_path,
+                    "score": score,
+                    **scores
+                })
+            except Exception as e:
+                print(f"Error processing CV {cv_path}: {e}")
+                results.append({
+                    "cv_path": cv_path,
+                    "score": score,
+                    **scores
+                })
 
         return results
