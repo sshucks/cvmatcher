@@ -76,12 +76,12 @@
         "properties": {
           "start": {
             "type": "string",
-            "format": "date-time",
+            "format": "date",
             "description": "The starting date of the employment (e.g., YYYY-MM-DD)."
           },
           "end": {
             "type": "string",
-            "format": "date-time",
+            "format": "date",
             "description": "The ending date of the employment, or null if current (e.g., YYYY-MM-DD)."
           },
           "industry": {
