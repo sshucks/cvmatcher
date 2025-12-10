@@ -6,9 +6,10 @@ import tempfile, shutil
 
 from typing import List, Optional
 from config import CV_OUTPUT_DIR
-from caching.utils import save_input_cvs
+from caching.utils import save_input_cvs, get_all_cvs
 from pipeline import pipeline_llm_parsing_previous_matching as pipeline
 from config import DEFAULT_MATCHING_CONFIG
+from pprint import pp
 
 app = FastAPI()
 
@@ -71,18 +72,19 @@ async def process_matching(
         # determine the applicants to score
         applicants = {}
         if all_cvs:
-             # if the flag for all cvs is checked, use all CVs in database
-            applicants["parsed"] = os.listdir(CV_OUTPUT_DIR)
-            hashes_parsed = [ os.path.basename(f).split(".")[0] for f in applicants["parsed"]]
-            print("hashes_parsed", hashes_parsed)
-            applicants["raw"] = [file for file in files_for_matching if os.path.basename(file).split(".")[0] not in hashes_parsed]
+            # if the flag for all cvs is checked, use all CVs in database
+            applicants["parsed"] = await get_all_cvs() # get all parsed CVs in the database
+            hashes_parsed = [os.path.basename(f[0]).split(".")[0] for f in applicants["parsed"]] # get the hashes for all parsed CVs
+            applicants["raw"] = [file for file in files_for_matching if os.path.basename(file[0]).split(".")[0] not in hashes_parsed] # mark uploaded CVs for parsing based on if they are not already parsed
+
             
         elif input_cvs:
             # if cvs are provided, use only provided CVs
-            applicants["parsed"] = [file for file in files_for_matching if os.path.basename(file).split(".")[-1] == "json"]
+            applicants["parsed"] = [file for file in files_for_matching if os.path.basename(file[0]).split(".")[-1] == "json"] # filter the already parsed CVs from the list of paths
+
+            # get the CVs to parse from the list of paths
             hashes_parsed = [ os.path.basename(f).split(".")[0] for f in os.listdir(CV_OUTPUT_DIR)]
-            print("hashes_parsed", hashes_parsed)
-            applicants["raw"] = [file for file in files_for_matching if os.path.basename(file).split(".")[0] not in hashes_parsed]
+            applicants["raw"] = [file for file in files_for_matching if os.path.basename(file[0]).split(".")[0] not in hashes_parsed]
 
         # if no CVs are provided and the all CVs flag is not checked, return errors
         if not all_cvs and not input_cvs:
@@ -108,14 +110,11 @@ async def process_matching(
             tmp_path = tmp.name
         
         
-        # Call the matching logic
-        print("running pipeline")
+        # Call the pipeline for parsing and matching
         results_df, warnings = pipeline.run_multiple_cvs(requirement_path= tmp_path, 
                                                          cv_paths=applicants, 
                                                          args=weighted_config )
         
-        #(pd.DataFrame({'applicants':applicants}), []) #call_matching(requirements, edu_weight, exp_weight, pro_weight, per_weight, n, applicants)
-
         if results_df is None:
             return JSONResponse(content={"error": "Error while extracting requirements! Check structure of requirements file and try again.", "warnings": warnings}, status_code=500)
 

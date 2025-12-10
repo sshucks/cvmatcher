@@ -87,11 +87,11 @@ async def save_input_cvs(input_cvs:List[UploadFile]) -> list:
     :param input_cvs: List of CVs to store
     :type input_cvs: List[UploadFile]
     
-    :return: list of hash values for further usage
+    :return: list of tuples, first element is file path to use, second element is the original file name
     :rtype: list of str
     """
     
-    results = []
+    result = []
     
     # for every file
     for cv in input_cvs:
@@ -111,9 +111,7 @@ async def save_input_cvs(input_cvs:List[UploadFile]) -> list:
         
         if file_exists:
             # TODO: implement logging
-             # add file to results
-            #cv = CachedCV_Wrapper(hash_digest, file_path, True)
-            print(f"{hash_digest} already exists, SKIPPING")
+             # add file to results        
             file_path = os.path.join(CV_OUTPUT_DIR, f"{hash_digest}.json")
         else:
             await store_cv(hash=hash_digest, file_name=file_name, output_dir=CV_INPUT_DIR, file=cv)
@@ -127,7 +125,19 @@ async def save_input_cvs(input_cvs:List[UploadFile]) -> list:
                 db.add(cv_entry)
                 db.commit()
             
-        results.append(file_path)
+        result.append((file_path, cv.filename))
     
     # return hash values for further usage
-    return results
+    return result
+
+async def get_all_cvs() -> List:
+    """
+    Retrive the path and the file name of all CVs that are already parsed
+
+    :return: List of tuples: (path to parsed CV, file name)
+    """
+    with get_db() as db:
+        cvs = db.query(CachedCVs).all()
+        parsed_files = [p.split('.')[0] for p in os.listdir(CV_OUTPUT_DIR)]
+        result = [(os.path.join(CV_OUTPUT_DIR, f"{cv.cv_hash}.json"), str(cv.file_name)) for cv in cvs if str(cv.cv_hash) in parsed_files]
+        return result
