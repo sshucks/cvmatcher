@@ -34,6 +34,7 @@ def encode(model:SentenceTransformer, texts:List[str], batch_size: int = 8)->np.
     
     # Concatenate embeddings
     embeddings = np.concatenate(embeddings)
+    
     return embeddings
 
 
@@ -66,6 +67,8 @@ def ESCO_labelling(
     :return: Set of all matches ESCO URI
     :rtype: Set[str]
     """
+    if len(terms) < 1:
+        return set([])
 
     # gather embeddings
     esco_embeddings = None

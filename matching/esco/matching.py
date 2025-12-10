@@ -57,7 +57,8 @@ class EscoMatchingStep(MatchingStep):
                     else:
                         print(f"{self.label([term])}:miss")
                         done = True
-        
+        if(len(requirements)) < 1:
+            return None, []
         return(score/len(requirements), matches)
 
 
