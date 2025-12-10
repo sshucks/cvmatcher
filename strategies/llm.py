@@ -105,7 +105,7 @@ class LLMCVParsingStep(CVParsingStep, PersistingMixin):
             aggregated_result = m_voting.apply_voting(intermediate_results)
 
             # persist the aggreagted data
-            filename = os.path.basename(cv_path)
+            filename = os.path.basename(cv_path).split('.')[0]
             self.persist_data(filename=filename, dest=CV_OUTPUT_DIR, data=aggregated_result)
 
             return aggregated_result

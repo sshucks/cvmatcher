@@ -4,6 +4,7 @@ from typing import TypedDict, cast, List, Dict
 import datetime
 import os
 import json
+import pandas as pd
 
 class EducationData(TypedDict):
     degree: str
@@ -127,33 +128,36 @@ class CVMatchingPipeline:
     
     def run_multiple_cvs(self, requirement_path, cv_paths:Dict[str, List[str]], args=None):
         results = []
-        requirements = self.RequirementsParsingStep.run(requirement_path, args=args)
-        cv_paths_more = [(item, key) for key, values in cv_paths.items() for item in values]
+        requirements = self.RequirementsParsingStep.run(requirement_path, args=args) # parse the requirements
+        cv_paths_more = [(item, key) for key, values in cv_paths.items() for item in values] # create tuples that contain the file information and the state (parsed/raw)
         print("Processing CVs for requirement:", requirement_path)
+        print(cv_paths)
         for cv_path in cv_paths_more:
             print("Processing CV:", cv_path)
             
             try: 
                 if cv_path[1] == "raw":
                     print("parsing cv")
-                    cv_data = self.CVParsingStep.run(cv_path[0], args=args)
+                    cv_data = self.CVParsingStep.run(cv_path[0][0], args=args)
                 elif cv_path[1] == "parsed":
-                    print("reading already parsed cv from file system")
-                    with open(cv_path[0]) as parsed_cv:
-                        cv_data = json.loads(parsed_cv)
+                    print(f"reading already parsed cv from file system: {cv_path[0][0]}")
+                    with open(cv_path[0][0], "r") as parsed_cv:
+                        cv_data = json.load(parsed_cv)
 
-                score = 0#self.MatchingStep.run(cv_data, requirements, args=args)
+                score = self.MatchingStep.run(cv_data, requirements, args=args)
             
                 results.append({
-                    "cv_path": cv_path,
+                    "cv_path": cv_path[0][0],
+                    "cv_file": cv_path[0][1],
                     "score": score
                 })
             except Exception as e:
-                print(f"Error processing CV {cv_path}: {repr(e)}")
+                print(f"Error processing CV {cv_path}")
                 results.append({
-                    "cv_path": cv_path,
+                    "cv_path": cv_path[0][0],
+                    "cv_file": cv_path[0][1],
                     "score": None
                 })
 
-        return results
+        return pd.DataFrame.from_dict(results), None
 
