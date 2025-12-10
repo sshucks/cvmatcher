@@ -56,7 +56,7 @@ class ABCBertMatchingStep(MatchingStep):
     
 class ABCExperienceBertMatchingStep(ABCBertMatchingStep):
 
-    def run(self, cv_data:list[ProfessionalExperienceData], requirements: ProfessionalExperienceData, args):
+    def run(self, cv_data:list[ProfessionalExperienceData], requirements: list[ProfessionalExperienceData], args):
         """
         Method to run BERT matching on professional experience data.
         
@@ -70,14 +70,14 @@ class ABCExperienceBertMatchingStep(ABCBertMatchingStep):
         
         # extract relevant fields
         cv_positions = [cv["job_title"] for cv in cv_data]
-        req_positions = [requirements["job_title"]]
+        req_positions = [requirements["job_title"] for requirements in requirements]
         
         cv_industries = [cv["industry"] for cv in cv_data]
-        req_industries = [requirements["industry"]]
+        req_industries = [requirements["industry"] for requirements in requirements]
         
         
         if cv_positions and req_positions:
-            title_score = self.run(req_positions, cv_positions, self.tokenizer, self.model)
+            title_score = super().run(req_positions, cv_positions)
         else:
             # if one of the lists is empty, we cannot compute a score
             title_score = None
@@ -89,7 +89,7 @@ class ABCExperienceBertMatchingStep(ABCBertMatchingStep):
                 
                 
         if cv_industries and req_industries:
-            industry_score = self.run(req_industries, cv_industries, self.tokenizer, self.model)
+            industry_score = super().run(req_industries, cv_industries)
         else:
             # if one of the lists is empty, we cannot compute a score
             industry_score = None
