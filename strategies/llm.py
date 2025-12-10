@@ -1,6 +1,6 @@
 from typing import TypedDict
 
-import utils, os, json
+import os, json
 from caching.CachingMixin import PersistingMixin
 from config import (LLM_SYSTEM_PROMPT_PATH_REQUIREMENTS_PARSING_DE, 
                     LLM_PARSED_REQUIREMENTS_SCHEMA, 
@@ -13,6 +13,7 @@ from parse_requirements.llm import extract_requirements as parse_requirements
 from parse_cv.llm import extract_cv as parse_cv
 from llm import ListIntersectionMajorityVotingStrategy, ListObjectMajorityVotingStrategy, \
     SingleValueMajorityVotingStrategy
+from utils.utils import read_pdf
 
 class LLMRequirementsParsingStep(RequirementsParsingStep):
     def run(self, requirements_path: str, args) -> RequirementsData:
@@ -27,7 +28,7 @@ class LLMRequirementsParsingStep(RequirementsParsingStep):
         n = args['n']
 
         # read requirements file and use important part of the file to reduce tokens
-        content = utils.read_pdf(requirements_path)
+        content = read_pdf(requirements_path)
         content = content.split("Umfeld der Position im Unternehmen")[0]
 
         try:
@@ -74,7 +75,7 @@ class LLMCVParsingStep(CVParsingStep, PersistingMixin):
         n = args['n']
 
         # read cv file
-        content = utils.read_pdf(cv_path)
+        content = read_pdf(cv_path)
 
         try:
             # call the LLM parsing multiple times because of none deterministic results
