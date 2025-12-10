@@ -59,3 +59,4 @@ DEFAULT_MATCHING_CONFIG  = {
              "m":LLM_MAJORITY_M,
              "n":LLM_MAJORITY_N
         }
+ESCO_PATH = "resources/esco"

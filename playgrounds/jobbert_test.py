@@ -66,3 +66,6 @@ embeddings = encode(model, job_titles)
 # Calculate cosine similarity matrix
 similarities = cos_sim(embeddings, embeddings)
 print(similarities)
+
+# match
+model.calculate_match(embeddings, embeddings, job_titles, job_titles)
