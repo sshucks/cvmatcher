@@ -11,8 +11,11 @@ class ABCBertMatchingStep(MatchingStep):
     """
     Abstract BERT Matching Step
     """
+    def __init__(self, model, tokenizer=None):
+        self.model = model
+        self.tokenizer = tokenizer
     
-    def run(self, requirements: list[str], cv_positions: list[str], tokenizer, model):
+    def run(self, requirements: list[str], cv_positions: list[str], args=None):
         """
         Perform BERT-based matching between requirements and CV positions.
         
@@ -21,13 +24,11 @@ class ABCBertMatchingStep(MatchingStep):
         :type requirements: list[str]
         :param cv_positions: List of CV strings
         :type cv_positions: list[str]
-        :param tokenizer: Tokenizer to use for embedding
-        :param model: Model to use for embedding
         """
         
         # embed requirements and CV positions
-        req_emb = self.embed_batch(requirements, tokenizer, model)
-        cv_emb = self.embed_batch(cv_positions, tokenizer, model)
+        req_emb = self.embed_batch(requirements, self.model, self.tokenizer)
+        cv_emb = self.embed_batch(cv_positions, self.model, self.tokenizer)
         
         # compute cosine similarity matrix
         sim_matrix = cos_sim(cv_emb, req_emb)
@@ -37,7 +38,7 @@ class ABCBertMatchingStep(MatchingStep):
         return sim_score
     
     @abstractmethod
-    def embed_batch(self, texts: list[str], model, tokenizer = None, batch_size=8):
+    def embed_batch(self, texts: list[str], model, tokenizer=None, batch_size=8):
         """
         Embed a batch of texts using the provided model and tokenizer.
         

@@ -1,5 +1,5 @@
 from definitions import *
-from matching.bert import BertMatchingStep, EducationBertMatchingStep
+from matching.bert.general_bert import BertMatchingStep, EducationBertMatchingStep
 
 class GermanBERTMatchingCategories(MatchingStepCategories):
     

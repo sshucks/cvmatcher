@@ -1,6 +1,6 @@
 from definitions import *
 from matching import JobBERTMatchingStep
-from matching.bert import EducationBertMatchingStep
+from matching.bert.general_bert import EducationBertMatchingStep
 
 class JobBERTMatchingCategories(MatchingStepCategories):
     

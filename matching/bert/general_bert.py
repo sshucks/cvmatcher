@@ -22,9 +22,9 @@ class BertMatchingStep(ABCBertMatchingStep):
             self.model_name = "google-bert/bert-base-german-cased"
         else:
             self.model_name = "google-bert/bert-base-uncased"
-            
-        self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
-        self.model = AutoModel.from_pretrained(self.model_name)
+
+        super().__init__(tokenizer = AutoTokenizer.from_pretrained(self.model_name),
+                         model = AutoModel.from_pretrained(self.model_name))
         
         
     def embed_batch(self, texts: list[str], model, tokenizer):
@@ -68,7 +68,10 @@ class EducationBertMatchingStep(BertMatchingStep):
         
         cv_grad = [cv["graduated"] for cv in cv_data]
         
-        penalty = args.get("graduation_penalty", 0.5)
+        if args:
+            penalty = args.get("graduation_penalty", 0.5)
+        else:
+            penalty = 0.5
         
         if cv_study and req_study:
             

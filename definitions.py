@@ -150,7 +150,7 @@ class MatchingStepCategories(MatchingStep):
     category_args: CategoryArguments 
 
     
-    def normalize(weights):
+    def normalize(self, weights):
         """
         Normalize a dictionary of weights so that they sum to 1.
         
@@ -181,11 +181,13 @@ class MatchingStepCategories(MatchingStep):
         :param self: Description
         :param args: Description
         """
-        for category in self.category_args:
-            if category + "_weight" in args:
-                self.category_args[category]['weight'] = args[category + "_weight"]
 
-    def run(self, cv_data: CVData, requirements: RequirementsData, cat_args) -> tuple[float, dict]:
+        if args:
+            for category in self.category_args:
+                if category + "_weight" in args:
+                    self.category_args[category]['weight'] = args[category + "_weight"]
+
+    def run(self, cv_data: CVData, requirements: RequirementsData, args) -> tuple[float, dict]:
         """
         Perform matching across multiple categories and compute a final score.
         
@@ -204,7 +206,7 @@ class MatchingStepCategories(MatchingStep):
         """
         
         # Update weights based on args
-        self.update_weights(cat_args)
+        self.update_weights(args)
         self.normalize_weights()
 
         # Perform matching for each category and collect scores
@@ -227,7 +229,7 @@ class MatchingStepCategories(MatchingStep):
             if cv_section and requirements_section:
                 weights[category] = weight
 
-                score = matching.run(cv_section, requirements_section, cat_args)
+                score = matching.run(cv_section, requirements_section, args)
 
                 scores[category] = score
 
@@ -268,7 +270,7 @@ class CVMatchingPipeline:
         self.CVParsingStep = CVParsingStep
         self.MatchingStep = MatchingStep
 
-    def run_single_cv(self, requirements_path, cv_path, args):
+    def run_single_cv(self, requirements_path, cv_path, args=None):
         """
         Run the CV matching pipeline for a single CV.
         
@@ -319,21 +321,21 @@ class CVMatchingPipeline:
 
             print("Processing CV:", cv_path)
 
-            try:
-                cv_data = self.CVParsingStep.run(cv_path, args=args)
-                score, scores = self.MatchingStep.run(cv_data, requirements, args=args)
+            # try:
+            cv_data = self.CVParsingStep.run(cv_path, args=args)
+            score, scores = self.MatchingStep.run(cv_data, requirements, args=args)
 
-                results.append({
-                    "cv_path": cv_path,
-                    "score": score,
-                    **scores
-                })
-            except Exception as e:
-                print(f"Error processing CV {cv_path}: {e}")
-                results.append({
-                    "cv_path": cv_path,
-                    "score": score,
-                    **scores
-                })
+            results.append({
+                "cv_path": cv_path,
+                "score": score,
+                **scores
+            })
+            # except Exception as e:
+            #     print(f"Error processing CV {cv_path}: {e}")
+            #     results.append({
+            #         "cv_path": cv_path,
+            #         "score": score,
+            #         **scores
+            #     })
 
         return results

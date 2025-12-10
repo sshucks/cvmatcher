@@ -8,7 +8,8 @@ from matching.bert.bert import ABCBertMatchingStep
 class JobBERTMatchingStep(ABCBertMatchingStep):
     
     def __init__(self):
-        self.model = SentenceTransformer("TechWolf/JobBERT-v3")
+        super().__init__(model = SentenceTransformer("TechWolf/JobBERT-v3"),
+                       tokenizer = None)
     
     def encode(self, jobbert_model, texts):
         """
