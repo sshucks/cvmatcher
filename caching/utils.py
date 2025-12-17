@@ -1,3 +1,5 @@
+import hashlib
+
 from fastapi import FastAPI, UploadFile, Form, File, status
 from typing import List
 from fastapi.responses import JSONResponse
@@ -29,6 +31,22 @@ def hash_in_database(hash:str) -> bool:
         # return if result exists
         return True if result else False
     
+def generate_file_hash(file: UploadFile) -> str:
+    """Calculate the hash value of a file
+
+    :param file: file for hash value calculation
+    :type file: UploadFile
+    :return: hex representation of hash code
+    :rtype: str
+    """
+    # calculate hashcode
+    digest = hashlib.file_digest(file, "sha256")
+
+    # reset pointer to beginning of file, for further consumption
+    file.seek(0)
+
+    # return hex representation of hash
+    return digest.hexdigest()
 
 async def store_cv(hash:str, file_name:str, output_dir:str, file:UploadFile):
     """Store the provided file in the filesystem. If it is DOCX, convert to PDF first.
@@ -45,7 +63,12 @@ async def store_cv(hash:str, file_name:str, output_dir:str, file:UploadFile):
     # check file type
     file_suffix = file_name.split(".")[-1].lower() 
     file_path = os.path.join(output_dir, file_name)
-    
+
+    # create directory if not existing
+    directory = os.path.dirname(file_path)
+    if directory:
+        os.makedirs(directory, exist_ok=True)
+
     match file_suffix:
         case "pdf":
             with open(file_path, "wb") as f:
@@ -58,54 +81,63 @@ async def store_cv(hash:str, file_name:str, output_dir:str, file:UploadFile):
             pass
 
 
-# async def save_input_cvs(input_cvs:List[UploadFile]) -> list:
-#     """Store and extract provided CVs, if they don't already exist (check via file hash)
+async def save_input_cvs(input_cvs:List[UploadFile]) -> list:
+    """Store provided CVs, if they don't already exist (check via file hash)
 
-#     :param input_cvs: List of CVs to store
-#     :type input_cvs: List[UploadFile]
+    :param input_cvs: List of CVs to store
+    :type input_cvs: List[UploadFile]
     
-#     :return: list of hash values for further usage
-#     :rtype: list of str 
-#     """
+    :return: list of tuples, first element is file path to use, second element is the original file name
+    :rtype: list of str
+    """
     
-#     results = []
+    result = []
     
-#     # for every file
-#     for cv in input_cvs:
+    # for every file
+    for cv in input_cvs:
         
-#         # generate hash value
-#         hash_digest = generate_file_hash(cv.file)
+        # generate hash value
+        hash_digest = generate_file_hash(cv.file)
         
-#         # check if hash already exists
-#         file_exists = hash_in_database(hash_digest)
+        # check if hash already exists
+        file_exists = hash_in_database(hash_digest)
         
-#         # generate new file name
-#         suffix = str(cv.filename).split('.')[-1]
-#         file_name =f"{hash_digest}.{suffix}"
+        # generate new file name
+        suffix = str(cv.filename).split('.')[-1]
+        file_name =f"{hash_digest}.{suffix}"
             
-#         # put together path for file location 
-#         file_path = os.path.join(CV_INPUT_DIR, file_name)
+        # put together path for file location
+        file_path = os.path.join(CV_INPUT_DIR, file_name)
         
-#         if file_exists:
-#             # TODO: implement logging
-#              # add file to results
-#             cv = CachedCV_Wrapper(hash_digest, file_path, True)
-#             print(f"{hash_digest} already exists, SKIPPING")
-#         else:
-#             await store_cv(hash=hash_digest, file_name=file_name, output_dir=CV_INPUT_DIR, file=cv)
+        if file_exists:
+            # TODO: implement logging
+             # add file to results        
+            file_path = os.path.join(CV_OUTPUT_DIR, f"{hash_digest}.json")
+        else:
+            await store_cv(hash=hash_digest, file_name=file_name, output_dir=CV_INPUT_DIR, file=cv)
             
-#             if "docx" in file_path:
-#                 file_path = file_path.replace("docx","pdf")
+            if "docx" in file_path:
+                file_path = file_path.replace("docx","pdf")
 
-#             extract_cv(file_path, hash_digest)
-
-#             # write extracted CV to database
-#             with get_db() as db:
-#                 cv_entry = CachedCVs(cv_hash=hash_digest, path=file_path, file_name=cv.filename)
-#                 db.add(cv_entry)
-#                 db.commit()
+            # write file path (hash) of CV to database
+            with get_db() as db:
+                cv_entry = CachedCVs(cv_hash=hash_digest, path=file_path, file_name=cv.filename)
+                db.add(cv_entry)
+                db.commit()
             
-#         results.append(hash_digest)
+        result.append((file_path, cv.filename))
     
-#     # return hash values for further usage
-#     return results
+    # return hash values for further usage
+    return result
+
+async def get_all_cvs() -> List:
+    """
+    Retrive the path and the file name of all CVs that are already parsed
+
+    :return: List of tuples: (path to parsed CV, file name)
+    """
+    with get_db() as db:
+        cvs = db.query(CachedCVs).all()
+        parsed_files = [p.split('.')[0] for p in os.listdir(CV_OUTPUT_DIR)]
+        result = [(os.path.join(CV_OUTPUT_DIR, f"{cv.cv_hash}.json"), str(cv.file_name)) for cv in cvs if str(cv.cv_hash) in parsed_files]
+        return result

@@ -1,6 +1,9 @@
 from abc import ABC, abstractmethod
-from typing import TypedDict, cast
+from typing import TypedDict, cast, List, Dict
 import datetime
+import os
+import json
+import pandas as pd
 import warnings
 import pandas as pd
 
@@ -103,7 +106,7 @@ class MatchingStep(ABC):
     """
      Abstract class for matching
     """
-    @abstractmethod
+    #@abstractmethod
     def run(self, cv_data: CVData, requirements: RequirementsData, args) -> float:
         """
         Abstract method to perform matching between CV data and requirements data
@@ -299,17 +302,20 @@ class CVMatchingPipeline:
 
         return final_scores
     
-    def run_multiple_cvs(self, requirement_path, cv_paths, args=None):
+    def run_multiple_cvs(self, requirement_path, cv_paths:Dict[str, List[str]], args=None):
         """
         Run the CV matching pipeline for multiple CVs against a single requirements file.
         Requirements parsing is executed only once, then each CV is processed in a loop.
         
         :param self:
         :param requirement_path: Path to requirements file
-        :param cv_paths: List of paths to CV files
+        :param cv_paths: Dictionary containing two lists, one with paths of already parsed CVs, one with paths of unparsed CVs
         :param args: Additional arguments
         """
         
+        results = []
+        requirements = self.RequirementsParsingStep.run(requirement_path, args=args) # parse the requirements
+        cv_paths_more = [(item, key) for key, values in cv_paths.items() for item in values] # create tuples that contain the file information and the state (parsed/raw)
         print("Processing CVs for requirement:", requirement_path)
         results = []
         score = None
@@ -317,25 +323,34 @@ class CVMatchingPipeline:
         requirements = self.RequirementsParsingStep.run(requirement_path, args=args)
 
         # Loop through each CV path and process
-        for cv_path in cv_paths:
+        for cv_path in cv_paths_more:
 
             print("Processing CV:", cv_path)
 
             try:
-                cv_data = self.CVParsingStep.run(cv_path, args=args)
+                if cv_path[1] == "raw":
+                    # print("parsing cv")
+                    cv_data = self.CVParsingStep.run(cv_path[0][0], args=args)
+                elif cv_path[1] == "parsed":
+                    # print(f"reading already parsed cv from file system: {cv_path[0][0]}")
+                    with open(cv_path[0][0], "r") as parsed_cv:
+                        cv_data = json.load(parsed_cv)
+
                 score, scores = self.MatchingStep.run(cv_data, requirements, args=args)
 
                 results.append({
-                    "cv_path": cv_path,
+                    "cv_path": cv_path[0][0],
+                    "cv_file": cv_path[0][1],
                     "score": score,
                     **scores
                 })
             except Exception as e:
-                print(f"Error processing CV {cv_path}: {e}")
+                print(f"Error processing CV {cv_path}")
                 results.append({
-                    "cv_path": cv_path,
+                    "cv_path": cv_path[0][0],
+                    "cv_file": cv_path[0][1],
                     "score": score,
                     **scores
                 })
 
-        return results
+        return pd.DataFrame.from_dict(results)

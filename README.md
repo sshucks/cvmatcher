@@ -166,7 +166,7 @@ python src/extracting/extraction_main.py
 
 #### Start FastAPI
 ```
-python -m fastapi dev src/api/api_call.py
+python -m fastapi dev application/api_call.py
 ```
 
 #### Start Streamlit App

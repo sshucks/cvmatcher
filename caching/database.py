@@ -3,9 +3,9 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 import contextlib
 
-from src.config import DATABASE_URL
+from config import DATABASE_URL
 
-from src.caching.models import Base
+from caching.models import Base
 
 import os
 
@@ -31,6 +31,7 @@ def init_db():
     Call this function once when your application starts for the first time
     or when you want to recreate the database schema (e.g., in tests).
     """
+    print(DATABASE_URL)
     Base.metadata.create_all(bind=engine)
     print(f"Database initialized at: {DATABASE_URL}")
     

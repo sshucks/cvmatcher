@@ -2,6 +2,8 @@ import os
 import subprocess
 import tempfile
 import pandas as pd
+import fitz
+import pymupdf
 
 
 async def convert_docx_to_pdf(file_path, new_name:str, output_dir:str):
@@ -75,4 +77,10 @@ async def convert_docx_to_pdf(file_path, new_name:str, output_dir:str):
                 
                 # delete the temporary file
                 os.unlink(temp_input_file.name)
-                
+
+def read_pdf(file_path:str) ->str:
+    text = ""
+    with pymupdf.open(file_path) as doc:
+        for page in doc:
+            text += page.get_text()
+    return text
