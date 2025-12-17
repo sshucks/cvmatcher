@@ -1,7 +1,7 @@
 import pandas as pd
 from sklearn.metrics import roc_auc_score
 
-validation_results = pd.read_csv("data/validation_data/validation_results/LLMParsed_PreviousGroup.csv")
+validation_results = pd.read_csv("data/validation_data/validation_results/LLMParsed_JobBert.csv")
 
 # remove rows with NaN in main score
 validation_results = validation_results.dropna(subset=['score'])
@@ -18,6 +18,7 @@ def compute_auc(df, feature_col):
     return roc_auc_score(df_clean['t1'], df_clean[feature_col])
 
 for col, label in [
+    ("score", "General Score"),
     ("education", "Education"),
     ("professional_experience", "Professional Experience"),
     ("hard_skills", "Hard Skills"),

@@ -1,5 +1,6 @@
-from definitions import *
-from matching.bert.general_bert import BertMatchingStep, EducationBertMatchingStep, ExperienceBertMatchingStep
+from definitions import MatchingStepCategories
+from matching.bert.general_bert import BertMatchingStep, EducationBertMatchingStep
+from matching.bert.bert import ABCBertMatchingStep, ExperienceBertMatchingStep
 
 class GermanBERTMatchingCategories(MatchingStepCategories):
     
@@ -10,7 +11,7 @@ class GermanBERTMatchingCategories(MatchingStepCategories):
         },
         "professional_experience": {
             "weight": 1.0,
-            "method": ExperienceBertMatchingStep(language="german"),
+            "method": ExperienceBertMatchingStep(BertMatchingStep(language="german")),
         },
         "hard_skills": {
             "weight": 1.0,

@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 from typing import TypedDict, cast
 import datetime
 import warnings
-import pandas as pd
 
 class EducationData(TypedDict):
     """
@@ -330,6 +329,7 @@ class CVMatchingPipeline:
                     "score": score,
                     **scores
                 })
+                
             except Exception as e:
                 print(f"Error processing CV {cv_path}: {e}")
                 results.append({

@@ -1,4 +1,4 @@
-from definitions import *
+from definitions import CVParsingStep, RequirementsData
 import json
 
 

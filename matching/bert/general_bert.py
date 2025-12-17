@@ -4,7 +4,7 @@ from sentence_transformers.util import cos_sim
 import warnings
 
 from definitions import EducationData
-from matching.bert.bert import ABCBertMatchingStep, ABCExperienceBertMatchingStep
+from matching.bert.bert import ABCBertMatchingStep
 
 class BertMatchingStep(ABCBertMatchingStep):
     """
@@ -100,10 +100,3 @@ class EducationBertMatchingStep(BertMatchingStep):
             avg_similarities = None
 
         return avg_similarities
-
-
-class ExperienceBertMatchingStep(BertMatchingStep, ABCExperienceBertMatchingStep):
-    
-    def __init__(self, language):
-        super().__init__(language)
-    

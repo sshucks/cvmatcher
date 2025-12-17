@@ -27,10 +27,13 @@ class JobBERTMatchingStep(ABCBertMatchingStep):
             out_features = jobbert_model.forward(features)
         return out_features["sentence_embedding"].cpu().numpy()
     
-    def embed_batch(self, texts: list[str], model, batch_size):
+    def embed_batch(self, texts: list[str], model, batch_size=8):
         # Sort texts by length and keep track of original indices
         sorted_indices = np.argsort([len(text) for text in texts])
         sorted_texts = [texts[i] for i in sorted_indices]
+        
+        if batch_size is None:
+            batch_size = 8
         
         embeddings = []
         

@@ -54,7 +54,10 @@ class ABCBertMatchingStep(MatchingStep):
         return
     
     
-class ABCExperienceBertMatchingStep(ABCBertMatchingStep):
+class ExperienceBertMatchingStep(MatchingStep):
+    
+    def __init__(self, bert_matching_step: ABCBertMatchingStep):
+        self.bert_matching_step = bert_matching_step
 
     def run(self, cv_data:list[ProfessionalExperienceData], requirements: list[ProfessionalExperienceData], args):
         """
@@ -77,7 +80,7 @@ class ABCExperienceBertMatchingStep(ABCBertMatchingStep):
         
         
         if cv_positions and req_positions:
-            title_score = super().run(req_positions, cv_positions)
+            title_score = self.bert_matching_step.run(req_positions, cv_positions)
         else:
             # if one of the lists is empty, we cannot compute a score
             title_score = None
@@ -89,7 +92,7 @@ class ABCExperienceBertMatchingStep(ABCBertMatchingStep):
                 
                 
         if cv_industries and req_industries:
-            industry_score = super().run(req_industries, cv_industries)
+            industry_score = self.bert_matching_step.run(req_industries, cv_industries)
         else:
             # if one of the lists is empty, we cannot compute a score
             industry_score = None

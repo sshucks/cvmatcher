@@ -1,4 +1,4 @@
-from definitions import *
+from definitions import MatchingStep, CVData, RequirementsData, CVParsingStep, RequirementsParsingStep, CVMatchingPipeline
 
 from matching.previous_group.match_applicants import match_applicant
 from parse_requirements.previous_group.extract_requirements import extract_requirement
@@ -23,7 +23,6 @@ class PreviousGroupMatching(MatchingStep):
                                 self.weights["education_weight"])
         return score
     
-
 class PreviousGroupRequirementsParsing(RequirementsParsingStep):
     def run(self, requirements_path: str, args) -> RequirementsData:
         return extract_requirement(requirements_path)
