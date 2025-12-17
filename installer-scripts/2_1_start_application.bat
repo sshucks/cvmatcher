@@ -11,6 +11,6 @@ if %ERRORLEVEL%==0 (
     docker run -dit -p 8501:8501 -p 8000:8000 -v "%cd%:/workspaces/cvmatcher" -w /workspaces/cvmatcher -e PYTHONPATH=/workspaces/cvmatcher --name %CONTAINER_NAME% %IMAGE_NAME%
 )
 
-docker exec -it %CONTAINER_NAME% bash /workspaces/cvmatcher/start-services.sh
+docker exec -it %CONTAINER_NAME% bash /workspaces/cvmatcher/installer-scripts/start-services.sh
 
 pause
