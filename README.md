@@ -117,6 +117,7 @@ python caching/database.py
 #### Start FastAPI
 ```
 python -m fastapi dev application/api_call.py
+python -m fastapi dev application/api_call.py
 ```
 
 #### Start Streamlit App
