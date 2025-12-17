@@ -329,10 +329,10 @@ class CVMatchingPipeline:
 
             try:
                 if cv_path[1] == "raw":
-                    print("parsing cv")
+                    # print("parsing cv")
                     cv_data = self.CVParsingStep.run(cv_path[0][0], args=args)
                 elif cv_path[1] == "parsed":
-                    print(f"reading already parsed cv from file system: {cv_path[0][0]}")
+                    # print(f"reading already parsed cv from file system: {cv_path[0][0]}")
                     with open(cv_path[0][0], "r") as parsed_cv:
                         cv_data = json.load(parsed_cv)
 
@@ -353,4 +353,4 @@ class CVMatchingPipeline:
                     **scores
                 })
 
-        return pd.DataFrame.from_dict(results), None
+        return pd.DataFrame.from_dict(results)

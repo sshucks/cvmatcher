@@ -18,10 +18,11 @@ pipeline = CVMatchingPipeline(
     )
 
 
-
 results = pd.DataFrame()
 for requirement_path, group in applicants_grouped:
     cv_paths = group['cv_path'].tolist()
+    cv_paths = [(cv_path, "") for cv_path in cv_paths]
+    cv_paths = {"raw": cv_paths, "parsed":[]}
     scores = pipeline.run_multiple_cvs(requirement_path, cv_paths, args={"m":2, "n":3})
     scores = pd.DataFrame(scores)
     merged = pd.merge(group, scores, on='cv_path')
