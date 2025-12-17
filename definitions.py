@@ -231,8 +231,10 @@ class MatchingStepCategories(MatchingStep):
             # if both entries exist, perform matching
             if cv_section and requirements_section:
                 weights[category] = weight
-
+                print("running partly matching")
+                print(type(matching))
                 score = matching.run(cv_section, requirements_section, args)
+                print(f"{category}-score: {score}")
 
                 scores[category] = score
 
@@ -321,6 +323,7 @@ class CVMatchingPipeline:
         score = None
         scores = {}
         requirements = self.RequirementsParsingStep.run(requirement_path, args=args)
+        #print(type(self.MatchingStep))
 
         # Loop through each CV path and process
         for cv_path in cv_paths_more:
@@ -332,10 +335,11 @@ class CVMatchingPipeline:
                     # print("parsing cv")
                     cv_data = self.CVParsingStep.run(cv_path[0][0], args=args)
                 elif cv_path[1] == "parsed":
-                    # print(f"reading already parsed cv from file system: {cv_path[0][0]}")
+                    print(f"reading already parsed cv from file system: {cv_path[0][0]}")
                     with open(cv_path[0][0], "r") as parsed_cv:
                         cv_data = json.load(parsed_cv)
-
+                
+                print("matching score")
                 score, scores = self.MatchingStep.run(cv_data, requirements, args=args)
 
                 results.append({
