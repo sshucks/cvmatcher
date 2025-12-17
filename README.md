@@ -69,12 +69,12 @@ python src/extracting/extraction_main.py
 
 ### Start FastAPI
 ```
-python -m fastapi dev src/api/api_call.py
+python -m fastapi dev application/api_call.py
 ```
 
 ### Start Streamlit App
 ```
-python -m streamlit run src/streamlit/matching_app.py
+python -m streamlit run application/matching_app.py
 ```
 
 ## Docker Commands to start application without VSCode and Batch Files
@@ -171,11 +171,11 @@ python -m fastapi dev application/api_call.py
 
 #### Start Streamlit App
 ```
-python -m streamlit run src/streamlit/matching_app.py
+python -m streamlit run application/matching_app.py
 ```
 
 #### Create Databse
 The database has to be created once.
 ```
-python src/caching/database.py
+python caching/database.py
 ```
