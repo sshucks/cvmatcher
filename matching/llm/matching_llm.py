@@ -17,6 +17,7 @@ class LLMPartlyMatchingStep(MatchingStep):
         n = args.get('n')
         m = args.get('m')
 
+
         try:
             intermediate_results = []
             matching_request = MatchingRequest(model_manager=ModelManager(),
@@ -28,29 +29,26 @@ class LLMPartlyMatchingStep(MatchingStep):
                     intermediate_results.append(result_i)
                 else:
                     raise ValueError("LLM could not parse file, response was None")
-            
             # perform majority voting on the results
             mapping = {
                 'score' : SingleValueMajorityVotingStrategy(key='score')
             }
-
             m_voting = MajorityVoting(m=m, n=n)
             m_voting.set_strategies(mapping=mapping)
             aggregated_result = m_voting.apply_voting(intermediate_results)
-            
             # take first of majority voted score
-            if aggregated_result['score']:
+            if aggregated_result['score'] != None:
                 # take the verbal explanation of the first result that shares this score
                 aggregated_result['verbal_explanation'] = [r for r in intermediate_results if aggregated_result['score'] == r['score']][0]
             else:
                 raise ValueError("No score was returned from the LLM")
 
             # return results
-            print(f"result:",aggregated_result)
-            return aggregated_result
+            return aggregated_result['score']
          
         except ValueError as e:
             print(f"An error occured: {repr(e)}")
+            return None
 
 class LLMFullMatchingStep(MatchingStep):
 
@@ -98,3 +96,4 @@ class LLMFullMatchingStep(MatchingStep):
          
         except ValueError as e:
             print(f"An error occured: {repr(e)}")
+            return None

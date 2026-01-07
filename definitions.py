@@ -184,11 +184,11 @@ class MatchingStepCategories(MatchingStep):
         :param self: Description
         :param args: Description
         """
-
         if args:
             for category in self.category_args:
-                if category + "_weight" in args:
-                    self.category_args[category]['weight'] = args[category + "_weight"]
+                if category in args and "weight" in args[category]:
+                    print("in if statement")
+                    self.category_args[category]['weight'] = args[category]["weight"]
 
     def run(self, cv_data: CVData, requirements: RequirementsData, args) -> tuple[float, dict]:
         """
@@ -211,6 +211,9 @@ class MatchingStepCategories(MatchingStep):
         # Update weights based on args
         self.update_weights(args)
         self.normalize_weights()
+        print(f"self.category_args: {self.category_args}")
+
+        print(f"in matching step, type {type(self)}")
 
         # Perform matching for each category and collect scores
         scores = {}
@@ -231,8 +234,6 @@ class MatchingStepCategories(MatchingStep):
             # if both entries exist, perform matching
             if cv_section and requirements_section:
                 weights[category] = weight
-                print("running partly matching")
-                print(type(matching))
                 score = matching.run(cv_section, requirements_section, args)
                 print(f"{category}-score: {score}")
 
@@ -250,6 +251,8 @@ class MatchingStepCategories(MatchingStep):
                 if not requirements_section:
                     warnings.warn(
                         f"Requirements data for '{category}' is empty.")
+        
+        print(f"scores: {scores}")
 
         # normalize weights again after removing empty sections
         normalized_weights = self.normalize(weights)
@@ -262,6 +265,7 @@ class MatchingStepCategories(MatchingStep):
 
         # calculate final score
         final_score = sum(weighted_scores.values())
+        print(f"final_score: {final_score}")
 
         return final_score, scores
 
@@ -338,9 +342,13 @@ class CVMatchingPipeline:
                     print(f"reading already parsed cv from file system: {cv_path[0][0]}")
                     with open(cv_path[0][0], "r") as parsed_cv:
                         cv_data = json.load(parsed_cv)
+
+                continue
                 
                 print("matching score")
                 score, scores = self.MatchingStep.run(cv_data, requirements, args=args)
+                print(f"score: {score}")
+                print(f"scores: {scores}")
 
                 results.append({
                     "cv_path": cv_path[0][0],
@@ -356,5 +364,5 @@ class CVMatchingPipeline:
                     "score": score,
                     **scores
                 })
-
-        return pd.DataFrame.from_dict(results)
+        print(f"results: {results}")
+        return pd.DataFrame.from_dict(results), None
