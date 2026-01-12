@@ -1,4 +1,5 @@
-from config import LLM_MODEL, LLM_ENDPOINT, LLM_RANDOM_SEED, LLM_TEMPERATURE, LLM_TOP_K, LLM_TOP_P
+from config import LLM_MODEL, LLM_ENDPOINT, LLM_RANDOM_SEED, LLM_TEMPERATURE, LLM_TOP_K, LLM_TOP_P, APPLICATION_SETTINGS_PATH
+import json
 class ModelManager:
     """
     Class to manage information regarding the LLM request. Implemented as a Singleton
@@ -11,7 +12,7 @@ class ModelManager:
         - top p
     """
     _uri = LLM_ENDPOINT
-    _model_name = LLM_MODEL
+    _model_name = None
     _random_seed = LLM_RANDOM_SEED
     _temperature = LLM_TEMPERATURE
     _top_k = LLM_TOP_K
@@ -22,6 +23,7 @@ class ModelManager:
     def __new__(cls, *args, **kwargs):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
+            
         return cls._instance
 
     
@@ -31,12 +33,13 @@ class ModelManager:
     def get_uri(self):
         return self._instance._uri
     
-    def set_model_name(self,model_name):
-        self._instance._model_name = model_name
 
     def get_model_name(self):
-        return self._instance._model_name
-
+        with open(APPLICATION_SETTINGS_PATH, "r", encoding="utf-8") as f:
+                settings = json.load(f)
+                llm_settings = settings.get("LLM", {})
+        return llm_settings.get("value", "NO MODEL SET")
+    
     def set_seed(self, seed):
         self._instance._random_seed = seed
 

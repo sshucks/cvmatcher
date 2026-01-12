@@ -1,7 +1,13 @@
 import os
 from definitions import MatchingStep
 
+APPLICATION_SETTINGS_PATH = "settings.json"
+MATCHING_HISTORY_PATH = "match_history.json"
+
 PHP_SCRIPT_CV_EXTRACTION = "./src/extracting/cv/curlRequest.php"
+
+# ------ UI ------
+CSS_PATH = "/workspaces/cvmatcher/application/style.css"
 
 # ------ INPUT / OUTPUT ------
 CV_INPUT_DIR = "data/input_cvs"

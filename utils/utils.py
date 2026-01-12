@@ -1,4 +1,4 @@
-import os
+import os, json
 import subprocess
 import tempfile
 import pandas as pd
@@ -84,3 +84,64 @@ def read_pdf(file_path:str) ->str:
         for page in doc:
             text += page.get_text()
     return text
+
+def make_history_file_if_not_exists():
+    """Create the matching history file if it does not exist
+    """
+    from config import MATCHING_HISTORY_PATH
+
+    if not os.path.exists(MATCHING_HISTORY_PATH):
+        with open(MATCHING_HISTORY_PATH, "w") as history_file:
+            json.dump([], history_file, indent=4)
+
+def update_history(requirements_file:str, cout_cvs:int, accepted:int, rejected:int):
+    """Update the matching history file with a new entry
+    :param requirements_file: name of the requirements file used
+    :type requirements_file: str
+    :param cout_cvs: number of CVs processed
+    :type cout_cvs: int
+    :param accepted: number of accepted CVs
+    :type accepted: int
+    :param rejected: number of rejected CVs
+    :type rejected: int
+    """
+    from config import MATCHING_HISTORY_PATH
+    
+    make_history_file_if_not_exists()
+    
+    with open(MATCHING_HISTORY_PATH, "r") as history_file:
+        history_file.seek(0)
+        try:
+            history = json.load(history_file)
+        except json.JSONDecodeError:
+            history = []
+        
+    from datetime import datetime
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
+    new_entry = {
+        "time": now,
+        "requirements_file": requirements_file,
+        "num_cvs": cout_cvs,
+        "accepted": accepted,
+        "rejected": rejected
+    }
+        
+    history.append(new_entry)
+    
+    with open(MATCHING_HISTORY_PATH, "r+") as history_file:
+        json.dump(history, history_file, indent=4)
+        
+
+def load_application_settings() -> dict:
+    """Load application settings from a JSON file
+    :param settings_path: path to the settings file
+    :type settings_path: str
+    :return: settings as a dictionary
+    :rtype: dict
+    """
+    from config import APPLICATION_SETTINGS_PATH
+
+    with open(APPLICATION_SETTINGS_PATH, "r", encoding='utf-8') as settings_file:
+        settings = json.load(settings_file)
+    return settings

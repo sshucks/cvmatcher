@@ -189,6 +189,8 @@ class MatchingStepCategories(MatchingStep):
             for category in self.category_args:
                 if category + "_weight" in args:
                     self.category_args[category]['weight'] = args[category + "_weight"]
+                if category in args and "weight" in args[category]:
+                    self.category_args[category]['weight'] = args[category]["weight"]
 
     def run(self, cv_data: CVData, requirements: RequirementsData, args) -> tuple[float, dict]:
         """
@@ -312,15 +314,13 @@ class CVMatchingPipeline:
         :param cv_paths: Dictionary containing two lists, one with paths of already parsed CVs, one with paths of unparsed CVs
         :param args: Additional arguments
         """
-        
-        results = []
         requirements = self.RequirementsParsingStep.run(requirement_path, args=args) # parse the requirements
+        
         cv_paths_more = [(item, key) for key, values in cv_paths.items() for item in values] # create tuples that contain the file information and the state (parsed/raw)
         print("Processing CVs for requirement:", requirement_path)
         results = []
         score = None
         scores = {}
-        requirements = self.RequirementsParsingStep.run(requirement_path, args=args)
 
         # Loop through each CV path and process
         for cv_path in cv_paths_more:
@@ -332,25 +332,39 @@ class CVMatchingPipeline:
                     # print("parsing cv")
                     cv_data = self.CVParsingStep.run(cv_path[0][0], args=args)
                 elif cv_path[1] == "parsed":
-                    # print(f"reading already parsed cv from file system: {cv_path[0][0]}")
                     with open(cv_path[0][0], "r") as parsed_cv:
                         cv_data = json.load(parsed_cv)
-
                 score, scores = self.MatchingStep.run(cv_data, requirements, args=args)
-
+                
                 results.append({
                     "cv_path": cv_path[0][0],
-                    "cv_file": cv_path[0][1],
-                    "score": score,
+                    "Filename": cv_path[0][1],
+                    "Name": cv_data.get("personal", {}).get("name", "N/A"),
+                    "E-Mail": cv_data.get("personal", {}).get("mail", "N/A"),
+                    "Score": score,
                     **scores
                 })
+                
+                # reset for next iteration in case of errors
+                cv_data = None
+                score = None
+                scores = {} 
+                
             except Exception as e:
                 print(f"Error processing CV {cv_path}")
                 results.append({
                     "cv_path": cv_path[0][0],
-                    "cv_file": cv_path[0][1],
-                    "score": score,
+                    "Filename": cv_path[0][1],
+                    "Name": cv_data.get("personal", {}).get("name", "N/A"),
+                    "E-Mail": cv_data.get("personal", {}).get("mail", "N/A"),
+                    "Score": score,
                     **scores
                 })
 
-        return pd.DataFrame.from_dict(results)
+        
+        # convert results to dataframe
+        results_df = pd.DataFrame.from_dict(results)
+        
+        # fill NaN values with 0
+        results_df.fillna(0, inplace=True)
+        return results_df, []

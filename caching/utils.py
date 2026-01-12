@@ -31,6 +31,25 @@ def hash_in_database(hash:str) -> bool:
         # return if result exists
         return True if result else False
     
+
+def get_cv_info(hash:str) -> Optional[str]:
+    """Get the file path of a CV based on its hash
+
+    :param hash: hash of CV file
+    :type hash: str
+    :return: path to CV file if found, else None
+    :rtype: Optional[str]
+    """
+    with get_db() as db:
+        # get first result of equal hash value
+        result = db.query(CachedCVs).filter(CachedCVs.cv_hash==str(hash)).first()
+        
+        # return path if result exists
+        if result:
+            return result
+        else:
+            return None
+    
 def generate_file_hash(file: UploadFile) -> str:
     """Calculate the hash value of a file
 
