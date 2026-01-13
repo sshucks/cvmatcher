@@ -15,7 +15,7 @@ class ReadLLMParsedCV(CVParsingStep):
         :rtype: CVData
         """
 
-        cv_path_parsed = cv_path.replace("raw_data", "parsed_data").replace(".docx", ".docx.json").replace(".pdf", ".pdf.json")
+        cv_path_parsed = cv_path.replace("raw_data", "parsed_data")
 
         try:
             with open(cv_path_parsed, "r", encoding="utf-8") as f:

@@ -15,7 +15,7 @@ class ReadLLMParsedRequirement(CVParsingStep):
         :rtype: RequirementsData
         """
 
-        req_path_parsed = req_path.replace("raw_data", "parsed_data").replace(".docx", ".docx.json")
+        req_path_parsed = req_path.replace("raw_data", "parsed_data")
 
         with open(req_path_parsed, "r", encoding="utf-8") as f:
             req_data = json.load(f)
