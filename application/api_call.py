@@ -13,7 +13,7 @@ from config import DEFAULT_MATCHING_CONFIG
 from pprint import pp
 
 from caching.utils import hash_in_database, get_cv_info
-from utils.utils import update_history, load_application_settings
+from utils.utils import update_history, load_application_settings, make_history_file_if_not_exists
 
 app = FastAPI()
 
@@ -82,6 +82,7 @@ async def get_history():
     """
     print("GET /history called")
     try:
+        make_history_file_if_not_exists()
         print(f"Fetching history from {MATCHING_HISTORY_PATH}")
         print(f"History file exists: {os.path.exists(MATCHING_HISTORY_PATH)}")
         with open(MATCHING_HISTORY_PATH, "r") as f:

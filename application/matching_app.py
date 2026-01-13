@@ -123,9 +123,6 @@ def process_matching() -> requests.Response:
 
 st.set_page_config(page_title="CV Matcher 🪄", layout="wide")
 
-STORAGE_DIR = Path("input_cvs")
-STORAGE_DIR.mkdir(exist_ok=True)
-
 
 class PersonRecord(TypedDict):
     Name: str
@@ -229,8 +226,6 @@ elif page == "analyses":
     if st.button("Clear History 🗑️"):
         clear_history()
         st.success("History cleared.")
-
-    st.caption(f"History file path: {HISTORY_FILE}")
 
     history = load_history()
 
@@ -376,7 +371,7 @@ else:
 
                 matching_results = process_matching()
 
-                if matching_results.status_code == 200:
+                if matching_results:
                     payload = matching_results.json()
                     results = payload.get("results", []) or []
                     st.session_state["results"] = results
