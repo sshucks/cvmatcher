@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# list files in the current directory for debugging
-ls -la
-
 # Start a new tmux session with two panes
 tmux new-session -d -s devsession
 
