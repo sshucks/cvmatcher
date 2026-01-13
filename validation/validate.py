@@ -3,18 +3,24 @@ from definitions import CVMatchingPipeline
 from parse_cv.read_llm_parsed_cv import ReadLLMParsedCV
 from parse_requirements.read_llm_parsed_requirement import ReadLLMParsedRequirement
 from strategies.jobbert import GermanEduJobBERTMatchingCategories #, JobBERTMatchingCategories
-# from strategies.previous_group import PreviousGroupRequirementsParsing, PreviousGroupCVParsing, PreviousGroupMatching
-# from strategies.bert import GermanBERTMatchingCategories
+from strategies.previous_group import PreviousGroupRequirementsParsing, PreviousGroupCVParsing, PreviousGroupMatching
+from strategies.bert import GermanBERTMatchingCategories
 
 
-applicants = pd.read_csv("data/validation_data/validation_data.csv")
+applicants = pd.read_csv("data/validation_data/combined_validation_data.csv")
 applicants_grouped = applicants.groupby('requirements_path')
 
+
+# pipeline = CVMatchingPipeline(
+#     RequirementsParsingStep=ReadLLMParsedRequirement(),
+#     CVParsingStep=ReadLLMParsedCV(),
+#     MatchingStep=GermanEduJobBERTMatchingCategories()
+#     )
 
 pipeline = CVMatchingPipeline(
     RequirementsParsingStep=ReadLLMParsedRequirement(),
     CVParsingStep=ReadLLMParsedCV(),
-    MatchingStep=GermanEduJobBERTMatchingCategories()
+    MatchingStep=GermanBERTMatchingCategories()
     )
 
 
@@ -29,4 +35,4 @@ for requirement_path, group in applicants_grouped:
     results = pd.concat([results, merged], ignore_index=True)
     print(results)
     
-results.to_csv("data/validation_data/validation_results/LLMParsed_JobBert.csv", index=False)
+results.to_csv("data/validation_data/validation_results/LLMParsed_GermanBERT.csv", index=False)
