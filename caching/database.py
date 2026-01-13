@@ -3,9 +3,9 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 import contextlib
 
-from src.config import DATABASE_URL
+from config import DATABASE_URL
 
-from src.caching.models import Base
+from caching.models import Base
 
 import os
 
