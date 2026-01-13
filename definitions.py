@@ -105,7 +105,7 @@ class MatchingStep(ABC):
     """
      Abstract class for matching
     """
-    @abstractmethod
+    # @abstractmethod
     def run(self, cv_data: CVData, requirements: RequirementsData, args) -> float:
         """
         Abstract method to perform matching between CV data and requirements data
@@ -332,7 +332,7 @@ class CVMatchingPipeline:
                     with open(cv_path[0][0], "r") as parsed_cv:
                         cv_data = json.load(parsed_cv)
 
-                score = self.MatchingStep.run(cv_data, requirements, args=args)
+                score, scores = self.MatchingStep.run(cv_data, requirements, args=args)
             
                 results.append({
                     "cv_path": cv_path[0][0],
