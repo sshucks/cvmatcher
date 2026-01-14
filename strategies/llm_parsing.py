@@ -12,7 +12,7 @@ from llm.majority_voting import MajorityVoting, ObjectMajoritVotingStrategy
 from parse_requirements.llm import extract_requirements as parse_requirements
 from parse_cv.llm import extract_cv as parse_cv
 from llm import ListIntersectionMajorityVotingStrategy, ListObjectMajorityVotingStrategy, \
-    SingleValueMajorityVotingStrategy
+    SingleValueListMajorityVotingStrategy
 from utils.utils import read_pdf
 
 class LLMRequirementsParsingStep(RequirementsParsingStep):
@@ -49,7 +49,7 @@ class LLMRequirementsParsingStep(RequirementsParsingStep):
                                                                             id_parts=['job_title', 'duration', 'industry']),
                 'hard_skills': ListIntersectionMajorityVotingStrategy(key="hard_skills"),
                 'soft_skills': ListIntersectionMajorityVotingStrategy(key="soft_skills"),
-                'job_title': SingleValueMajorityVotingStrategy(key='job_title')
+                'job_title': SingleValueListMajorityVotingStrategy(key='job_title')
             }
 
             m_voting = MajorityVoting(m=m, n=n)

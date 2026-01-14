@@ -75,7 +75,7 @@ class EducationEscoMatchingStep(EscoMatchingStep):
 
         self.occupation_preferredLabels = e.read_occupation_preferredLabels(self.language)
 
-    def run(self, education_cv: EducationData, education_req: EducationData, args) -> float:
+    def run(self, education_cv: list[EducationData], education_req: list[EducationData], args) -> float:
         """ Do education matching of cv and requirement
 
         :param education_cv: EducationData of CV

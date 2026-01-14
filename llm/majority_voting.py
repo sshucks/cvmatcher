@@ -146,6 +146,42 @@ class ObjectMajoritVotingStrategy(MajorityVotingFieldStrategy):
 
         return results
 
+class SingleValueListMajorityVotingStrategy(MajorityVotingFieldStrategy):
+    def __init__(self, key:str):
+        """
+        Initialize majority voting strategy to handle fields that hold a single value
+        :param key: JSON key to apply the strategy on
+        """
+        MajorityVotingFieldStrategy.__init__(self, key)
+    
+    def apply(self, data: List[Dict], m:int, n:int) -> Any:
+        """
+        Perform majority voting by finding the most common value of a field
+        :param data: list of JSON data
+        :param m: minimum number of responses that share the content
+        :param n: total number of responses
+        :return: Most abundant value for the given field, with respect to m and n
+        """
+
+        # filter the input data for the given key
+        filtered_data = [x[self.key] for x in data]
+       
+        # flatten list of lists
+        values = sum(filtered_data, [])
+
+        # count object occurrences and filter for a minimum of m occurrences
+        counts = Counter(values)
+
+        counts = sorted(counts.items(), reverse=True) # sort descending
+        counts = dict(counts)
+        value_to_select = {item for item, count in counts.items() if count >= m}
+
+        # take the most frequent value that is above m
+        if len(value_to_select) == 1:
+            return list(value_to_select)[0] 
+        else:
+            raise ValueError
+    
 class SingleValueMajorityVotingStrategy(MajorityVotingFieldStrategy):
     def __init__(self, key:str):
         """
@@ -162,14 +198,16 @@ class SingleValueMajorityVotingStrategy(MajorityVotingFieldStrategy):
         :param n: total number of responses
         :return: Most abundant value for the given field, with respect to m and n
         """
+
         # filter the input data for the given key
         filtered_data = [x[self.key] for x in data]
-
+       
         # flatten list of lists
-        values = sum(filtered_data, [])
+        values = filtered_data
 
         # count object occurrences and filter for a minimum of m occurrences
         counts = Counter(values)
+
         counts = sorted(counts.items(), reverse=True) # sort descending
         counts = dict(counts)
         value_to_select = {item for item, count in counts.items() if count >= m}
@@ -249,6 +287,8 @@ class MajorityVoting():
         :param data: list of JSON data to perform majority voting on
         :return: Dict of the majority aggregated JSON data
         """
+        
+
         majority_voted = {}
         for key, value in self.voting_strategy.items():
             majority_voted[key] = value.apply(data, m = self.m, n=self.n)
