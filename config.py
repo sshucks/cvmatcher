@@ -1,7 +1,13 @@
 import os
 from definitions import MatchingStep
 
+APPLICATION_SETTINGS_PATH = "settings.json"
+MATCHING_HISTORY_PATH = "match_history.json"
+
 PHP_SCRIPT_CV_EXTRACTION = "./src/extracting/cv/curlRequest.php"
+
+# ------ UI ------
+CSS_PATH = "/workspaces/cvmatcher/application/style.css"
 
 # ------ INPUT / OUTPUT ------
 CV_INPUT_DIR = "data/input_cvs"
@@ -11,8 +17,7 @@ CV_STORAGE = "data/cv_database"
 
 VALIDATION_DATA_DIR = "data/validation_data"
 
-# ------ CACHING ------
-DATABASE_FOLDER = "./caching"
+DATABASE_FOLDER = "caching"
 DATABASE_FILE_NAME = "cv_caching.db"
 DATABASE_FILE_PATH = os.path.join(DATABASE_FOLDER, DATABASE_FILE_NAME)
 DATABASE_URL = f"sqlite:///{DATABASE_FILE_PATH}"

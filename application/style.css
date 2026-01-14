@@ -1,0 +1,215 @@
+.navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 0rem;
+    background-color: #ffffff;
+    border-bottom: 1px solid #eaeaea;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    margin-bottom: 1rem;
+}
+
+.nav-title {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #1A1A1A;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.nav-links {
+    display: flex;
+    gap: 25px;
+}
+
+.nav-link {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #284AA3;
+    text-decoration: none;
+}
+
+.nav-link:hover {
+    color: #1f3a82;
+}
+
+.match-green { color: #2ECC71; font-weight: 600; }
+.match-orange { color: #F39C12; font-weight: 600; } /* for Match % only */
+.match-red { color: #E74C3C; font-weight: 600; }
+
+.match-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 18px;
+}
+
+.match-table th, .match-table td {
+    border: 1px solid #dcdcdc;
+    padding: 10px;
+    font-size: 0.9rem;
+}
+
+.match-table th {
+    background-color: #f2f2f2;
+    font-weight: 700;
+}
+
+.cv-button {
+    background-color: #284AA3;
+    color: white !important;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    text-decoration: none !important;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.cv-button:hover {
+    background-color: #1f3a82;
+    color: white !important;
+}
+
+button[kind="formSubmit"],
+.stButton > button,
+div.stForm button,
+button[type="submit"] {
+    background-color: #284AA3 !important;
+    color: white !important;
+    border: none !important;
+    padding: 10px 22px !important;
+    border-radius: 6px !important;
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+}
+
+button[kind="formSubmit"]:hover,
+.stButton > button:hover,
+div.stForm button:hover,
+button[type="submit"]:hover {
+    background-color: #1f3a82 !important;
+}
+
+.skill-row {
+    margin-bottom: 10px;
+    max-width: 50%;
+}
+
+.skill-name {
+    font-weight: 500;
+    margin-bottom: 2px;
+}
+
+.skill-bar-outer {
+    width: 100%;
+    background-color: #e5e5e5;
+    border-radius: 999px;
+    height: 8px;
+    overflow: hidden;
+}
+
+.skill-bar-inner {
+    height: 100%;
+    border-radius: 999px;
+}
+
+.skill-bar-inner.high { background-color: #2ECC71; }
+.skill-bar-inner.medium { background-color: #F39C12; }
+.skill-bar-inner.low { background-color: #E74C3C; }
+
+div[data-testid="stSelectbox"] > div {
+    max-width: 50%;
+}
+
+div[data-testid="stForm"] { margin-top: 0 !important; }
+div[data-testid="stVerticalBlock"] { padding-top: 0 !important; }
+div[data-testid="column"] { margin-top: 15px !important; }
+
+
+/* ================================
+   FILE UPLOADER PAGINATION (Home)
+   ================================ */
+
+div[data-testid="stFileUploaderPagination"] > button {
+    margin: 0 !important;
+    padding: 6px 14px !important;
+    border-radius: 6px !important;
+}
+
+div[data-testid="stFileUploaderPagination"] > button:first-of-type {
+    margin-right: 10px !important;  
+}
+
+
+/* ================================
+      NUMBER INPUT BUTTONS (Settings)
+   ================================ */
+
+div[data-testid="stNumberInput"] > button {
+    margin: 0 !important;
+    padding: 3px 10px !important;
+    border-radius: 4px !important;
+}
+
+div[data-testid="stNumberInput"] > button:first-of-type {
+    margin-bottom: 4px !important;  
+}
+
+button[data-testid="stNumberInputStepDown"] {
+   margin-right: 10px;
+}
+
+section.main > div.block-container{
+            padding-top: 0.5rem !important;
+        }
+        h2, h3{
+            margin-top: 0.2rem !important;
+            padding-top: 0 !important;
+        }
+
+        div[data-testid="stForm"]{
+            max-width: 700px;
+            margin: 0 auto !important;
+        }
+
+        /* Settings texts LEFT */
+        div[data-testid="stForm"]{
+            direction: ltr;
+            text-align: left;
+        }
+        div[data-testid="stForm"] label{
+            width: 100%;
+            text-align: left !important;
+        }
+        div[data-testid="stForm"] input,
+        div[data-testid="stForm"] textarea{
+            direction: ltr;
+            text-align: left;
+        }
+
+        div[data-testid="stFormSubmitButton"]{
+            display: flex !important;
+            justify-content: flex-end !important;
+        }
+
+        .settings-title{
+            max-width: 700px !important;
+            margin: 0 auto 0.2rem auto !important;
+            font-size: 2rem !important;
+            font-weight: 700 !important;
+            line-height: 1.1 !important;
+            text-align: left !important;
+        }
+
+        div[data-testid="stForm"]{
+            margin-top: 0rem !important;
+        }
+
+div[data-testid="stAppViewContainer"] section.main h2{
+                margin-bottom: 0rem !important;
+                padding-bottom: 0 !important;
+            }
+            div[data-testid="stForm"]{
+                margin-top: 0rem !important;
+            }
