@@ -1,0 +1,17 @@
+{
+    "LLM": {
+        "key": "llm_model",
+        "type": "text",
+        "label": "LLM Model",
+        "value": "lamma3.1:8b"
+    },
+    "Threshold": {
+        "key": "acceptance_threshold",
+        "type": "number",
+        "value": 0.75,
+        "min": 0.0,
+        "max": 1.0,
+        "step": 0.01,
+        "label": "Acceptance Threshold"
+    }
+}
