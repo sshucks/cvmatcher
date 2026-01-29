@@ -1,126 +1,115 @@
-# SPD2_TRESCON: CV_Matcher
+# Proposal
 
-This projects aims to match the best applicants to a job description based on their CV.
+Optimierung des bestehenden Studienprojekts als Cloud-Anwendung mit Micro-Services.
 
-## Setup
+---
 
-### Requirements
-Download and Install Docker Desktop: https://docs.docker.com/get-started/introduction/get-docker-desktop/
+## Studienprojekt – CV-Matcher
 
-### Get Source Code
-Either clone the repository like this
-```
-git clone https://github.com/sshucks/cvmatcher
-cd cvmatcher
-```
-or unzip the downloaded source code in your desired workspace.
+### Einführung
 
-### 1. Installation
-Make sure that Docker Desktop is running, then execute *1_installer.bat*
-This can take quite a long time (up to 20 minutes). Once the container has built, you can execute 1_2_create_database. These steps only need to be executed once.
-After that you can start the application as written below.
+Unser Studienprojekt ist eine Kooperation mit **Trescon** und beschäftigt sich mit der maschinellen Bewertung von Lebensläufen.  
+Dabei werden Lebensläufe mit Anforderungsdokumenten verglichen, welche den/die ideale/n Kandidat/in für eine Stelle beschreiben. Ziel ist es, passende Kandidat*innen effizient zu identifizieren.
 
-### 2. Run application
-Run *2_start_application* to create and run the Docker container.
+Es wurde mit Trescon bereits abgeklärt, dass dieses Studienprojekt in diesem Rahmen verwendet werden darf.
 
-### 3. Stop application
-To stop the application run *3_stop_application.bat*
+---
 
-## Docker Commands to start application without VSCode and Batch Files
+## Methodik
 
-### Build Docker Container
-Make sure that Docker Desktop is running, then open a terminal in the directory *cv_matcher* and run the following command to build the docker container. 
+Lebensläufe und Anforderungsdokumente werden mithilfe eines **Large Language Models (LLM)** geparst und in ein maschinenlesbares Format überführt (JSON mit vordefinierter Struktur).  
+Die geparsten Lebensläufe werden anschließend in einer Datenbank gespeichert.
 
-```
-docker build -f .devcontainer/Dockerfile -t cvmatcher-dev .
-```
+Für die weitere Verarbeitung und Bewertung wurden mehrere Methoden entwickelt:
 
-This can take quite a long time (up to 20 minutes) and only needs to be done once. Once the container has built, you can create the database and start the application as written below.
+- **Vergleich über Embeddings**  
+  Cosine Similarity misst die Ähnlichkeit zwischen Lebenslauf und Anforderungsdokument
 
-### Start application
+- **ESCO-Ontologie**  
+  Die ESCO-Ontologie beschreibt Berufe und Fähigkeiten.  
+  ESCO-Terme aus dem Anforderungsdokument werden im Lebenslauf gesucht.  
+  Ein Score gibt an, wie viele dieser Begriffe abgedeckt sind.
 
-First make sure that Docker Desktop is running, then run the following command in a terminal inside the directory *cv_matcher*.
+- **Vergleich mit LLM**  
+  Lebenslauf und Anforderungsdokument werden gemeinsam an das LLM übergeben, das einen sprachlich erklärten Score erzeugt.
 
-If you are using Windows:
-```
-docker run -it --rm -p 8501:8501 -p 8000:8000 -v "%cd%:/workspaces/cvmatcher" -w /workspaces/cvmatcher -e PYTHONPATH=/workspaces/cvmatcher --name cvmatcher cvmatcher-dev
-```
+---
 
-If you are using Linux or WSL:
-```
-docker run -it --rm -p 8501:8501 -p 8000:8000 -v "${PWD}:/workspaces/cvmatcher" -w /workspaces/cvmatcher -e PYTHONPATH=/workspaces/cvmatcher --name cvmatcher cvmatcher-dev
-```
+## Aktuelle Architektur
 
-Then execute this command to start a bash in the Docker-Container.
-```
-docker exec -it cvmatcher bash
-```
+Die derzeitige Systemarchitektur besteht aus zwei getrennten Schichten (Frontend und Backend), die beide mit Python implementiert wurden und mittels FastAPI kommunizieren. Beide Komponenten werden gemeinsam in einem Docker Container betrieben. Die Anwendung ist derzeit für den lokalen Betrieb ausgelegt. Die Ausführung des integrierten Large Language Models erfolgt GPU-beschleunigt und wird über Ollama angebunden. Die Entscheidung für das lokale LLM verlief vor allem aufgrund der Datenschutzverordnung, um reale Kundendaten von TRESCON verwenden zu dürfen. Dieser Sicherheitsaspekt soll im gesamten Projekt beachtet werden.
 
-### Create Database
-If you haven't created the database yet, execute this command (only needs to be done once)
-```
-python caching/database.py
-```
+Zurzeit werden die geparsten Lebensläufe als Dateien lokal gespeichert und der Dateipfad wird gemeinsam mit einem eindeutigen Hash in einer Datenbank abgelegt. Bei Upload eines Lebenslaufs wird mittels Hash überprüft ob dieser bereits in der Datenbank vorhanden ist, ansonsten wird er ebenfalls geparst und der Pfad wird in der Datenbank abgelegt.
 
-### Start FastAPI
-```
-python -m fastapi dev application/api_call.py
-```
+---
 
-### Start Streamlit App
-```
-python -m streamlit run application/api_call.py
-```
+## Neues Development
 
-Note that there is some more wait time included in starting the API. 
-After both applications have started successfully, the application can be accessed at http://localhost:8501/
+Im Rahmen dieses Projekts soll die bestehende Applikation in eine **Microservice-Architektur** überführt werden.
 
+Geplante Microservices:
 
-### Stop the application
-To stop the application execute the following command or stop the container *cv_matcher* in Docker Desktop.
-```
-docker stop cvmatcher
-```
+- UI-Service
+- CV-Parsing-Service
+- Requirements-Parsing-Service
+- Matching-Service
+- Database-Service
 
-## Contribute to this project using VS Code
+Alle Services sollen in **unabhängigen Docker-Containern** deployt werden.
 
-### Setup
+Zusätzlich soll evaluiert werden, wie die Abfrage des LLMs in der **Cloud** ausgeführt werden kann, sodass keine lokalen Ressourcen (GPU) mehr benötigt werden.  Nach Möglichkeit soll diese Cloud-LLM-Lösung auch implementiert werden.
 
-#### Requirements
-Download and Install Docker Desktop: https://docs.docker.com/get-started/introduction/get-docker-desktop/
+Besondere Schwerpunkte:
+- Datensicherheit und Datenschutz
+- Kostenoptimierung
 
-Download and Install VSCode: https://code.visualstudio.com/download
-Install the following VSCode Extension: ms-vscode-remote.remote-containers
+---
 
+## Architektur
 
-#### Checkout Repository
-If you have problems with authentication use GitHub Desktop to clone repository.
+![Architecture](clc_architecture.png)
 
-```
-git clone https://github.com/sshucks/cvmatcher
-cd cvmatcher
-code .
-```
+---
 
-### Start Devcontainer in VS Code
-Make sure that Docker Desktop is running.
-Open Folder cvmatcher in VS Code and click “Reopen in Container” when prompted, or press Ctrl + Shift + P, then select “Dev Containers: Reopen in Container” from the command palette.
+## Cloud-Technologien
 
-Start the API and Streamlit-App using the commands. Note that there is some more wait time included in starting the API. After both applications have started successfully, the application can be accessed at http://localhost:8501/
+Für dieses Projekt wird **Google Cloud** verwendet.  
+Es wurde eine eigene E-Mail-Adresse erstellt, über die alle Teilnehmerinnen Zugriff auf die Cloud-Ressourcen erhalten.  
+Diese kann später auch an die Auftraggeber übergeben werden.
 
-#### Create Databse
-The database has to be created once.
-```
-python caching/database.py
-```
+---
 
-#### Start FastAPI
-```
-python -m fastapi dev application/api_call.py
-```
+## Meilensteine und Arbeitsaufteilung
 
-#### Start Streamlit App
-```
-python -m streamlit run application/matching_app.py
-```
+Es wurden drei zentrale Meilensteine definiert, für die jeweils eine Person verantwortlich ist:
+
+---
+
+### 1. Containerisierung & Service-Trennung  
+**Verantwortlich:** Maja Nikolic
+
+- Basis-Containerisierung  
+  - Erstellung eigener Dockerfiles für jeden Service
+- Orchestrierung  
+  - Gemeinsamer Betrieb aller Services im Entwicklungsumfeld
+
+---
+
+### 2. Datenhaltung in Cloud-Datenbank  
+**Verantwortlich:** Sigrid Klein
+
+- Datenmodellierung  
+  - NoSQL-Schema (MongoDB)
+- Datenbank-Setup in der Cloud
+- Integration in die Microservices unter Einhaltung der DSGVO
+
+---
+
+### 3. LLM to Cloud  
+**Verantwortlich:** Nina Schellner
+
+- Ist-Analyse der aktuellen LLM-Implementierung
+- Datenschutz- und Sicherheitsbewertung der Google-Cloud-LLM-Lösung
+- Optional: Prototypische Integration in die bestehende Applikation
+
 
