@@ -3,8 +3,8 @@ import torch
 from sentence_transformers.util import cos_sim
 import warnings
 
-from definitions import EducationData
-from matching.bert.bert import ABCBertMatchingStep, ABCExperienceBertMatchingStep
+# from definitions import EducationData
+from bert.bert import ABCBertMatchingStep, ABCExperienceBertMatchingStep
 
 class BertMatchingStep(ABCBertMatchingStep):
     """
@@ -49,7 +49,7 @@ class EducationBertMatchingStep(BertMatchingStep):
     def __init__(self, language):
         super().__init__(language)
 
-    def run(self, cv_data:list[EducationData], requirements: list[EducationData], args):
+    def run(self, cv_data:list[dict], requirements: list[dict]):
         """
         Method to run BERT matching on education data.
         
@@ -66,12 +66,7 @@ class EducationBertMatchingStep(BertMatchingStep):
         cv_study = [cv["field_of_study"] for cv in cv_data]
         req_study = [req["field_of_study"] for req in requirements]
         
-        cv_grad = [cv["graduated"] for cv in cv_data]
-        
-        if args:
-            penalty = args.get("graduation_penalty", 0.5)
-        else:
-            penalty = 0.5
+        # cv_grad = [cv["graduated"] for cv in cv_data]
         
         if cv_study and req_study:
             
@@ -80,11 +75,11 @@ class EducationBertMatchingStep(BertMatchingStep):
             cv_emb = self.embed_batch(cv_study, self.model, self.tokenizer)
             sim_matrix = cos_sim(cv_emb, req_emb) # cv is rows, req is columns
 
-            if cv_grad:
-                # Reduce similarity by half for non-graduated candidates
-                for i in range(len(cv_grad)):
-                    if not cv_grad[i]:
-                        sim_matrix[i, :] *= penalty
+            # if cv_grad:
+            #     # Reduce similarity by half for non-graduated candidates
+            #     for i in range(len(cv_grad)):
+            #         if not cv_grad[i]:
+            #             sim_matrix[i, :] *= penalty
                     
             # TODO: degree level matching - no priority for now
             

@@ -4,10 +4,12 @@ import torch
 import numpy as np
 import warnings
 
-from definitions import MatchingStep, ProfessionalExperienceData
+# from bert.jobbert import JobBERTMatchingStep
+
+# from definitions import MatchingStep, ProfessionalExperienceData
 
 
-class ABCBertMatchingStep(MatchingStep):
+class ABCBertMatchingStep():
     """
     Abstract BERT Matching Step
     """
@@ -27,8 +29,8 @@ class ABCBertMatchingStep(MatchingStep):
         """
         
         # embed requirements and CV positions
-        req_emb = self.embed_batch(requirements, self.model, self.tokenizer)
-        cv_emb = self.embed_batch(cv_positions, self.model, self.tokenizer)
+        req_emb = self.embed_batch(requirements, self.model)
+        cv_emb = self.embed_batch(cv_positions, self.model)
         
         # compute cosine similarity matrix
         sim_matrix = cos_sim(cv_emb, req_emb)
@@ -38,15 +40,14 @@ class ABCBertMatchingStep(MatchingStep):
         return sim_score
     
     @abstractmethod
-    def embed_batch(self, texts: list[str], model, tokenizer=None, batch_size=8):
+    def embed_batch(self, texts: list[str], model, batch_size=8):
         """
-        Embed a batch of texts using the provided model and tokenizer.
+        Embed a batch of texts using the provided model.
         
         :param self: 
         :param texts: list of texts to embed
         :type texts: list[str]
         :param model: Model to use for embedding
-        :param tokenizer: Tokenizer to use for embedding
         :param batch_size: Batch size
         :type batch_size: int
         """
@@ -54,9 +55,9 @@ class ABCBertMatchingStep(MatchingStep):
         return
     
     
-class ABCExperienceBertMatchingStep(ABCBertMatchingStep):
-
-    def run(self, cv_data:list[ProfessionalExperienceData], requirements: list[ProfessionalExperienceData], args):
+class ABCExperienceBertMatchingStep():
+    
+    def run(self, cv_data:list[dict], requirements: list[dict]):
         """
         Method to run BERT matching on professional experience data.
         
@@ -69,15 +70,15 @@ class ABCExperienceBertMatchingStep(ABCBertMatchingStep):
         """
         
         # extract relevant fields
-        cv_positions = [cv["job_title"] for cv in cv_data]
-        req_positions = [requirements["job_title"] for requirements in requirements]
+        cv_positions = [cv["job_title"] for cv in cv_data if cv["job_title"] != ""]
+        req_positions = [requirements["job_title"] for requirements in requirements if requirements["job_title"] != ""]
         
-        cv_industries = [cv["industry"] for cv in cv_data]
-        req_industries = [requirements["industry"] for requirements in requirements]
+        cv_industries = [cv["industry"] for cv in cv_data if cv["industry"] != ""]
+        req_industries = [requirements["industry"] for requirements in requirements if requirements["industry"] != ""]
         
         
         if cv_positions and req_positions:
-            title_score = super().run(req_positions, cv_positions)
+            title_score = self.bert_matching_step.run(req_positions, cv_positions)
         else:
             # if one of the lists is empty, we cannot compute a score
             title_score = None
@@ -89,7 +90,7 @@ class ABCExperienceBertMatchingStep(ABCBertMatchingStep):
                 
                 
         if cv_industries and req_industries:
-            industry_score = super().run(req_industries, cv_industries)
+            industry_score = self.bert_matching_step.run(req_industries, cv_industries)
         else:
             # if one of the lists is empty, we cannot compute a score
             industry_score = None
@@ -111,4 +112,6 @@ class ABCExperienceBertMatchingStep(ABCBertMatchingStep):
             average_similarity = None
 
         return average_similarity
+    
+    
     

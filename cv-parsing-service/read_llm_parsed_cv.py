@@ -3,14 +3,13 @@ import json
 
 
 class ReadLLMParsedCV(CVParsingStep):
-    def run(self, cv_path: str, args) -> CVData:
+    def run(self, cv_path: str) -> CVData:
         """
         Read parsed CV from LLM
         
         :param self: 
         :param cv_path: OS Path to CV (.pdf or .docx)
         :type cv_path: str
-        :param args: Optional arguments
         :return: CV Data
         :rtype: CVData
         """

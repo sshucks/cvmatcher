@@ -1,0 +1,17 @@
+services:
+  frontend:
+    build: ./frontend
+    ports:
+      - "8501:8501"
+    depends_on:
+      - matching-service
+      - cv-parsing-service
+      - requirements-parsing-service
+
+  cv-parsing-service:
+    build: ./cv-parsing-service
+
+  requirements-parsing-service:
+    build: ./requirements-parsing-service
+  matching-service:
+    build: ./matching-service

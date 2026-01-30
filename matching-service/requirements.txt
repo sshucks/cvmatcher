@@ -1,0 +1,9 @@
+tqdm
+torch
+transformers
+numpy<2.0
+fastapi
+fastapi[standard]
+# huggingface_hub[hf_xet]
+sentence-transformers
+pandas

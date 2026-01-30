@@ -1,0 +1,6 @@
+streamlit
+streamlit-extras
+pandas
+requests
+streamlit
+debugpy

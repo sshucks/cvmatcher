@@ -3,7 +3,8 @@ import numpy as np
 from tqdm.auto import tqdm
 from sentence_transformers import SentenceTransformer
 from sentence_transformers.util import batch_to_device
-from matching.bert.bert import ABCBertMatchingStep
+
+from bert.bert import ABCBertMatchingStep
 
 class JobBERTMatchingStep(ABCBertMatchingStep):
     
@@ -27,7 +28,7 @@ class JobBERTMatchingStep(ABCBertMatchingStep):
             out_features = jobbert_model.forward(features)
         return out_features["sentence_embedding"].cpu().numpy()
     
-    def embed_batch(self, texts: list[str], model, batch_size):
+    def embed_batch(self, texts: list[str], model, batch_size=8):
         # Sort texts by length and keep track of original indices
         sorted_indices = np.argsort([len(text) for text in texts])
         sorted_texts = [texts[i] for i in sorted_indices]
@@ -43,3 +44,4 @@ class JobBERTMatchingStep(ABCBertMatchingStep):
         sorted_embeddings = np.concatenate(embeddings)
         original_order = np.argsort(sorted_indices)
         return sorted_embeddings[original_order]
+

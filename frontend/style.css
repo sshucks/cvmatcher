@@ -131,7 +131,7 @@ div[data-testid="column"] { margin-top: 15px !important; }
    FILE UPLOADER PAGINATION (Home)
    ================================ */
 
-div[data-testid="stFileUploaderPagination"] > button {
+/* div[data-testid="stFileUploaderPagination"] > button {
     margin: 0 !important;
     padding: 6px 14px !important;
     border-radius: 6px !important;
@@ -139,7 +139,7 @@ div[data-testid="stFileUploaderPagination"] > button {
 
 div[data-testid="stFileUploaderPagination"] > button:first-of-type {
     margin-right: 10px !important;  
-}
+} */
 
 
 /* ================================
