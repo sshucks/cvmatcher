@@ -135,10 +135,12 @@ Diese kann später auch an die Auftraggeber übergeben werden.
 * **Server auf 0.0.0.0 binden:** Nur so sind Services im Docker-internen Netzwerk sichtbar und für andere Container erreichbar.
 
 ### Google Cloud Storage 
-* **Abstimmung zwischen Services**: Korrekte Abstimmung zwischen Services kann zu Problemen führen.
+* **Python Unterstützung**: Python Library erleichtert Kommunikation
+* **Datenmodellierung** Simple Datenmodellierung zu bevorzugen, klar getrennte Buckets für separate Wartungsmöglichkeiten
 * **DSGVO**: DSGVO-konforme Einrichtung hat vielseitige Aspekte, die berücksichtigt werden müssen.
 
 ### Large Language Model
 * **Sicherheitsbewertung**: Sicherheitsbewertung ist als erster Schritt vor der Implementierung notwendig, um Probleme und Anforderungen frühzeitig erkennen und lösen zu können.
 * **Parametrisierung des Modells**: Korrekte Parametrisierung des Modells führt zu verlässlicheren Ergebnissen. Zusätzliches Majority Voting erhöht Verlässlichkeit noch mehr.
+
 
