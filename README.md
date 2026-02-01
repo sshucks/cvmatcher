@@ -57,7 +57,7 @@ Zurzeit werden die geparsten Lebensläufe als Dateien lokal gespeichert und der 
 
 ---
 
-## Neues Development
+## Neues Deployment
 
 Im Rahmen dieses Projekts wurde die bestehende Applikation in eine **Microservice-Architektur** überführt, wobei folgende Microservices umgesetzt wurden
 
@@ -89,41 +89,9 @@ Diese kann später auch an die Auftraggeber übergeben werden.
 
 ---
 
-## Meilensteine und Arbeitsaufteilung
+## Lessons-learned
 
-Es wurden drei zentrale Meilensteine definiert, für die jeweils eine Person verantwortlich ist:
-
----
-
-### 1. Containerisierung & Service-Trennung  
-**Verantwortlich:** Maja Nikolic
-
-- Basis-Containerisierung  
-  - Erstellung eigener Dockerfiles für jeden Service
-- Orchestrierung  
-  - Gemeinsamer Betrieb aller Services im Entwicklungsumfeld
-
----
-
-### 2. Datenhaltung in Cloud-Datenbank  
-**Verantwortlich:** Sigrid Klein
-
-- Datenmodellierung  
-  - Speichern von Original-Lebensläufen (pdf) und geparsten Lebensläufen (json)
-  - Herstellen der Verbindung zwischen pdf und json
-- Datenbank-Setup in der Cloud mit Hilfe von Google Cloud Storage
-- Integration in die Microservices unter Einhaltung der DSGVO
-  - Eigener Microservice: Data-Access-Service
-
----
-
-### 3. LLM to Cloud  
-**Verantwortlich:** Nina Schellner
-
-- Ist-Analyse der aktuellen LLM-Implementierung
-- Datenschutz- und Sicherheitsbewertung der Google-Cloud-LLM-Lösung
-- Optional: Prototypische Integration in die bestehende Applikation
-
-
-
-
+### Internes Docker-Netzwerk
+* **Container-Isolation:** ```localhost``` gilt nur innerhalb eines Containers, keine direkte Kommunikation zwischen Services über ```localhost```.
+* **Service-Namen nutzen:** Kommunikation zwischen Microservices muss über die Docker-Service-Namen erfolgen (cv-parsing-service:8000 etc.).
+* **Server auf 0.0.0.0 binden:** Nur so sind Services im Docker-internen Netzwerk sichtbar und für andere Container erreichbar.
