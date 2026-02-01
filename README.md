@@ -1,3 +1,8 @@
+# CLC3-Projekt: Microservice-Architektur für CVMatcher
+
+Im Rahmen dieses Projekts wurde eine bestehende Python-Anwendung bestehend aus Streamlit-Frontend und FastAPI-Backend in eine containerisierte Microservice-Architektur überführt. Ziel war es, die Anwendung modularer, robuster und skalierbarer zu gestalten.
+
+
 # Applikation starten
 ## .env File modifizieren
 Das -env File konfiguriert den Pfad zu den Google Cloud Credentials. Dieser Pfad muss individuell angepasst werden und zu Credentials führen die Berechtigung für den Zugriff zu den entsprechenden Google Cloud Storage Buckets haben.
@@ -10,11 +15,6 @@ Der Command "docker compose up" startet die Applikation. Sie ist nun auf http://
 
 ---
 
-# Proposal
-
-Optimierung des bestehenden Studienprojekts als Cloud-Anwendung mit Micro-Services.
-
----
 
 ## Studienprojekt – CV-Matcher
 
@@ -47,27 +47,30 @@ Für die weitere Verarbeitung und Bewertung wurden mehrere Methoden entwickelt:
 
 ---
 
-## Aktuelle Architektur
+## Ausgangssituation
 
 Die derzeitige Systemarchitektur besteht aus zwei getrennten Schichten (Frontend und Backend), die beide mit Python implementiert wurden und mittels FastAPI kommunizieren. Beide Komponenten werden gemeinsam in einem Docker Container betrieben. Die Anwendung ist derzeit für den lokalen Betrieb ausgelegt. Die Ausführung des integrierten Large Language Models erfolgt GPU-beschleunigt und wird über Ollama angebunden. Die Entscheidung für das lokale LLM verlief vor allem aufgrund der Datenschutzverordnung, um reale Kundendaten von TRESCON verwenden zu dürfen. Dieser Sicherheitsaspekt soll im gesamten Projekt beachtet werden.
 
 Zurzeit werden die geparsten Lebensläufe als Dateien lokal gespeichert und der Dateipfad wird gemeinsam mit einem eindeutigen Hash in einer Datenbank abgelegt. Bei Upload eines Lebenslaufs wird mittels Hash überprüft ob dieser bereits in der Datenbank vorhanden ist, ansonsten wird er ebenfalls geparst und der Pfad wird in der Datenbank abgelegt.
 
+![Old Architecture](clc_old_architecture.png)
+
 ---
 
 ## Neues Development
 
-Im Rahmen dieses Projekts soll die bestehende Applikation in eine **Microservice-Architektur** überführt werden.
-
-Geplante Microservices:
+Im Rahmen dieses Projekts wurde die bestehende Applikation in eine **Microservice-Architektur** überführt, wobei folgende Microservices umgesetzt wurden
 
 - UI-Service
 - CV-Parsing-Service
 - Requirements-Parsing-Service
 - Matching-Service
-- Database-Service
+- DataAccess-Service
 
-Alle Services sollen in **unabhängigen Docker-Containern** deployt werden.
+Alle Services laufen in separaten Docker-Containern und kommunizieren über das interne Docker-Netzwerk mittels HTTP. Die Netzwerkverwaltung und Orchestierung wird von Docker Compose übernommen.
+
+
+![New Architecture](clc_new_architecture.png)
 
 Zusätzlich soll evaluiert werden, wie die Abfrage des LLMs in der **Cloud** ausgeführt werden kann, sodass keine lokalen Ressourcen (GPU) mehr benötigt werden.  Nach Möglichkeit soll diese Cloud-LLM-Lösung auch implementiert werden.
 
@@ -77,11 +80,6 @@ Besondere Schwerpunkte:
 
 ---
 
-## Architektur
-
-![Architecture](clc_architecture.png)
-
----
 
 ## Cloud-Technologien
 
