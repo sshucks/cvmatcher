@@ -1,0 +1,36 @@
+# Git
+.git
+.gitignore
+
+# VS Code configs
+.vscode
+.devcontainer
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.env
+.venv
+venv
+pip-log.txt
+*.egg-info
+*.dist-info
+
+# Logs & temp
+*.log
+*.tmp
+tmp/
+logs/
+
+# Build artifacts
+build/
+dist/
+coverage/
+
+# OS junk
+.DS_Store
+Thumbs.db
+*.swp
+*.swo

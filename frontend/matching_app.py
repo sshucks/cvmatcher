@@ -2,6 +2,7 @@
 import streamlit as st
 import requests
 import pandas as pd
+import base64
 
 
 # --- Settings ---
@@ -33,7 +34,17 @@ def extract_column(row, col_path):
 
 def request_cv_file_from_api(applicant_hash):
     # TODO @Sigi
-    pass
+    response = requests.get(
+                    "http://data-access-service:8000/get-cv-pdf",
+                    params={"hash": applicant_hash}  # pass query parameters correctly
+                )
+    
+    if response.status_code == 200:
+        pdf_bytes = response.content
+        base64_pdf = base64.b64encode(pdf_bytes).decode("utf-8")
+        return base64_pdf
+    
+    return None
 
 def process_matching(requirements, cvs, use_all_cvs, edu_weight, exp_weight, pro_weight, per_weight):
     weights = {

@@ -7,6 +7,7 @@ services:
       - matching-service
       - cv-parsing-service
       - requirements-parsing-service
+      - data-access-service
 
   cv-parsing-service:
     build: ./cv-parsing-service
@@ -15,3 +16,10 @@ services:
     build: ./requirements-parsing-service
   matching-service:
     build: ./matching-service
+  
+  data-access-service:
+    build: ./data-access-service
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/creds/key.json
+    volumes:
+      - ${GCP_CREDS_PATH}:/creds/key.json:ro
