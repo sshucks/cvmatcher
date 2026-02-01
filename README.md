@@ -99,9 +99,11 @@ Es wurden drei zentrale Meilensteine definiert, für die jeweils eine Person ver
 **Verantwortlich:** Sigrid Klein
 
 - Datenmodellierung  
-  - NoSQL-Schema (MongoDB)
-- Datenbank-Setup in der Cloud
+  - Speichern von Original-Lebensläufen (pdf) und geparsten Lebensläufen (json)
+  - Herstellen der Verbindung zwischen pdf und json
+- Datenbank-Setup in der Cloud mit Hilfe von Google Cloud Storage
 - Integration in die Microservices unter Einhaltung der DSGVO
+  - Eigener Microservice: Data-Access-Service
 
 ---
 
@@ -111,5 +113,6 @@ Es wurden drei zentrale Meilensteine definiert, für die jeweils eine Person ver
 - Ist-Analyse der aktuellen LLM-Implementierung
 - Datenschutz- und Sicherheitsbewertung der Google-Cloud-LLM-Lösung
 - Optional: Prototypische Integration in die bestehende Applikation
+
 
 
