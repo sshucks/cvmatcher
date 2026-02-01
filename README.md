@@ -16,6 +16,13 @@ Der Command "docker compose up" startet die Applikation. Sie ist nun auf http://
 ---
 
 ## Cloud Data Storage
+Für die Cloud-Datenspeicherung ist vorgesehen, sowohl hochgeladene Lebensläufe im PDF-Format als auch die daraus geparsten Lebenslaufdaten im JSON-Format zu speichern. Zwischen dem Originaldokument und der geparsten Version muss eine eindeutige Beziehung bestehen. Diese Zuordnung wird über einen gemeinsamen Dateinamen realisiert, der auf einem Hash des PDF-Dokuments basiert. Dadurch entsteht eine 1:1-Beziehung zwischen PDF und JSON.
+
+Als Cloud-Service wird Google Cloud Storage (GCS) eingesetzt. Um Struktur und Sicherheit zu gewährleisten, werden separate Buckets verwendet: ein Bucket für die PDF-Dateien und ein weiterer Bucket für die JSON-Dateien. Der Client kommuniziert direkt mit GCS über die Python-Bibliothek google.cloud.storage.
+
+Die Authentifizierung erfolgt über einen dedizierten Service Account. Die benötigten Credentials werden der Anwendung über Docker Compose zur Verfügung gestellt. Da personenbezogene Daten verarbeitet werden, unterliegt die Lösung den Anforderungen der DSGVO. Entsprechend muss ein Auftragsverarbeitungsvertrag mit Google abgeschlossen werden. In unserem Fall müsste dieser Vertrag durch TRESCON mit Google geschlossen werden.
+
+Zusätzlich werden geeignete IAM-Richtlinien eingesetzt, um Datenschutz und Zugriffssicherheit zu gewährleisten. Die Datenspeicherung erfolgt ausschließlich innerhalb der Europäischen Union. Als Region ist beispielsweise europe-west9 (Paris) vorgesehen, um die Einhaltung europäischer Datenschutzanforderungen sicherzustellen.
 
 ---
 
@@ -134,3 +141,4 @@ Diese kann später auch an die Auftraggeber übergeben werden.
 ### Large Language Model
 * **Sicherheitsbewertung**: Sicherheitsbewertung ist als erster Schritt vor der Implementierung notwendig, um Probleme und Anforderungen frühzeitig erkennen und lösen zu können.
 * **Parametrisierung des Modells**: Korrekte Parametrisierung des Modells führt zu verlässlicheren Ergebnissen. Zusätzliches Majority Voting erhöht Verlässlichkeit noch mehr.
+
