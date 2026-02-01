@@ -1,3 +1,15 @@
+# Applikation starten
+## .env File modifizieren
+Das -env File konfiguriert den Pfad zu den Google Cloud Credentials. Dieser Pfad muss individuell angepasst werden und zu Credentials führen die Berechtigung für den Zugriff zu den entsprechenden Google Cloud Storage Buckets haben.
+
+## docker compose build
+Der Command "docker compose build" baut den Docker Container mit allen Microservices. Dazu muss Docker Desktop aktiv sein.
+
+## docker compose up
+Der Command "docker compose up" startet die Applikation. Sie ist nun auf http://localhost:8501/ erreichbar
+
+---
+
 # Proposal
 
 Optimierung des bestehenden Studienprojekts als Cloud-Anwendung mit Micro-Services.
@@ -113,6 +125,7 @@ Es wurden drei zentrale Meilensteine definiert, für die jeweils eine Person ver
 - Ist-Analyse der aktuellen LLM-Implementierung
 - Datenschutz- und Sicherheitsbewertung der Google-Cloud-LLM-Lösung
 - Optional: Prototypische Integration in die bestehende Applikation
+
 
 
 
